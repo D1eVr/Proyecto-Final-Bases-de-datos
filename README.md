@@ -9,19 +9,41 @@ El sistema está construido bajo una arquitectura modular utilizando:
 	•	HTML/CSS/JS – Interfaz moderna estilo Glassmorphism.
 	•	Transacciones Atómicas – Uso de select_for_update() y F() para integridad de datos.
 
-Instalación Rápida
+Instalación Rápida para Mac
 1.⁠ ⁠Clonar el repositorio
-git clone https://github.com/D1eVr/Proyecto-Final-Bases-de-datos.git
-cd Condominios
+git clone https://github.com/D1eVr/Proyecto-Final-Bases-de-datos.git 
+
+3.Entrar a la carpeta de Proyecto-Final-Bases-de-datos/Condominios desde la terminal con 
+cd Proyecto-Final-Bases-de-datos/Condominios
 
 2.⁠ ⁠Levantar contenedores
 docker-compose up --build -d
 
-3.⁠ ⁠Inicializar la base de datos
-docker exec -it <contenedor_web> bash
-python manage.py migrate
-python manage.py loaddata initial_data.json
-exit
+4.⁠ ⁠Acceso al sistema
+http://localhost:8000
+
+
+
+Instalación Rápida para Windows
+1.⁠ ⁠Clonar el repositorio
+git clone https://github.com/D1eVr/Proyecto-Final-Bases-de-datos.git 
+
+3.Entrar a la carpeta de Proyecto-Final-Bases-de-datos/Condominios desde la terminal con 
+cd Proyecto-Final-Bases-de-datos/Condominios
+
+2.⁠ ⁠Levantar contenedores
+docker-compose up --build -d
+docker compose ps
+docker exec web python manage.py migrate python manage.py loaddata initial_data.json
+docker ps -a
+docker-compose up -d
+docker logs condominios-db-1
+(Get-Content -Raw wait-for-db.sh) -replace "`r`n", "`n" | Set-Content -NoNewline -Encoding UTF8 wait-for-db.sh
+docker-compose down --volumes
+docker-compose build --no-cache
+docker-compose up
+
+
 
 4.⁠ ⁠Acceso al sistema
 http://localhost:8000
