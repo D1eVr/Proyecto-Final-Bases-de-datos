@@ -1,0 +1,535 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - CondoGest</title>
+
+    <!-- Fuente Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at top, #0e77c4 0, #020b1f 55%);
+            min-height: 100vh;
+            font-family: "Poppins", sans-serif;
+            color: #f4f7fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .background-blur {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            filter: blur(58px);
+            z-index: -1;
+        }
+
+        .blue-glow {
+            top: -60px;
+            left: -40px;
+            background: rgba(14, 119, 196, 0.7);
+        }
+
+        .purple-glow {
+            bottom: -90px;
+            right: -40px;
+            background: rgba(134, 77, 217, 0.6);
+        }
+
+        .container {
+            width: min(100%, 1100px);
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 32px;
+            padding: 36px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+        }
+
+        .panel-info {
+            padding: 24px 26px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(9, 19, 48, 0.92), rgba(10, 28, 72, 0.92));
+            border: 1px solid rgba(88, 142, 255, 0.35);
+            box-shadow: 0 24px 70px rgba(5, 10, 25, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-info::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(56, 182, 255, 0.16), transparent 65%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .panel-info h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
+        .panel-info p.subtitle {
+            margin: 0;
+            color: rgba(230, 236, 255, 0.85);
+            font-size: 15px;
+        }
+
+        .tagline {
+            margin-top: 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 13px;
+            border-radius: 999px;
+            background: rgba(9, 138, 255, 0.08);
+            border: 1px solid rgba(137, 196, 255, 0.45);
+            color: rgba(214, 230, 255, 0.92);
+            font-size: 13px;
+        }
+
+        .tagline span.icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: radial-gradient(circle at top, #38b6ff, #0e77c4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .features-grid {
+            margin-top: 26px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .feature-card {
+            padding: 12px 13px;
+            border-radius: 16px;
+            background: rgba(9, 22, 63, 0.9);
+            border: 1px solid rgba(82, 134, 241, 0.25);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .feature-card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: rgba(56, 182, 255, 0.16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+        }
+
+        .feature-card-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feature-card-text {
+            font-size: 12px;
+            color: rgba(215, 230, 255, 0.9);
+        }
+
+        .footer-info {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(196, 210, 255, 0.9);
+        }
+
+        .footer-info span.badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(139, 230, 180, 0.5);
+            background: rgba(7, 89, 60, 0.35);
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        .login-card {
+            padding: 28px 26px;
+            border-radius: 24px;
+            background: radial-gradient(circle at top left, rgba(56, 182, 255, 0.18), transparent 58%),
+                        linear-gradient(145deg, rgba(5, 10, 25, 0.96), rgba(7, 15, 36, 0.98));
+            border: 1px solid rgba(88, 142, 255, 0.4);
+            box-shadow: 0 26px 80px rgba(3, 7, 18, 0.95);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at top, rgba(56, 182, 255, 0.22), transparent 62%),
+                radial-gradient(circle at bottom right, rgba(134, 77, 217, 0.16), transparent 60%);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        .login-card-inner {
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .login-title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .login-title h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .login-title span {
+            font-size: 13px;
+            color: rgba(210, 223, 255, 0.9);
+        }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.6);
+            color: rgba(236, 253, 245, 0.9);
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pill span.dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+        }
+
+        .form-group {
+            margin-top: 12px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: rgba(220, 230, 255, 0.95);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-group {
+            margin-top: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(95, 145, 245, 0.6);
+            background: rgba(6, 12, 34, 0.85);
+            color: #f9fbff;
+            outline: none;
+            font-size: 14px;
+            transition: border 0.18s, box-shadow 0.18s, transform 0.08s;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(160, 178, 230, 0.9);
+        }
+
+        .input-group input:focus {
+            border-color: #38b6ff;
+            box-shadow: 0 0 0 1px rgba(56, 182, 255, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 12px;
+            color: rgba(194, 209, 255, 0.9);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #38b6ff;
+        }
+
+        .forgot-link a {
+            color: #90c2ff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .forgot-link a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #38b6ff, #0e77c4);
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            transition: .3s;
+            animation: fadeUp 1.8s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(56,182,255,0.45);
+        }
+
+        .error-message {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: rgba(255, 99, 132, 0.12);
+            color: #ff4b6b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .links {
+            margin-top: 15px;
+            animation: fadeUp 2s ease;
+        }
+
+        .links a {
+            color: #9fd1ff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(209, 224, 255, 0.92);
+            margin-top: 16px;
+        }
+
+        .brand-badge img {
+            width: 26px;
+            height: 26px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid rgba(79, 130, 255, 0.6);
+        }
+
+        .logo-floating {
+            position: absolute;
+            right: 18px;
+            bottom: 18px;
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: radial-gradient(circle at top, #38b6ff, #0e77c4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 22px rgba(56, 182, 255, 0.8);
+            opacity: 0.95;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-blur blue-glow"></div>
+    <div class="background-blur purple-glow"></div>
+
+    <div class="container">
+        <section class="panel-info">
+            <div>
+                <h1>CondoGest</h1>
+                <p class="subtitle">Control profesional de condominios con una interfaz clara, moderna y rápida.</p>
+
+                <div class="tagline">
+                    <span class="icon">⚙️</span>
+                    <span>Centraliza cuotas, residentes, áreas comunes y reportes en un solo lugar.</span>
+                </div>
+
+                <div class="features-grid">
+                    <article class="feature-card">
+                        <div class="feature-card-icon">💳</div>
+                        <div>
+                            <div class="feature-card-title">Pagos y morosidad</div>
+                            <p class="feature-card-text">
+                                Lleva el control de cuotas al día, atrasos y recordatorios automatizados.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-card-icon">📊</div>
+                        <div>
+                            <div class="feature-card-title">Dashboard en tiempo real</div>
+                            <p class="feature-card-text">
+                                Visualiza indicadores clave: ocupación, ingresos, avisos y tickets abiertos.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-card-icon">👥</div>
+                        <div>
+                            <div class="feature-card-title">Residentes y unidades</div>
+                            <p class="feature-card-text">
+                                Registra propietarios, inquilinos, unidades y estatus desde un mismo panel.
+                            </p>
+                        </div>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-card-icon">🛠️</div>
+                        <div>
+                            <div class="feature-card-title">Tickets y mantenimiento</div>
+                            <p class="feature-card-text">
+                                Gestiona solicitudes de mantenimiento y seguimiento de incidencias.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="footer-info">
+                    Pensado para administradores que necesitan orden, trazabilidad y reportes claros.
+                    <span class="badge">Modo Demo académico</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-card">
+            <div class="login-card-inner">
+                <header class="login-header">
+                    <div class="login-title">
+                        <h2>Acceso al panel</h2>
+                        <span>Inicia sesión para gestionar tu condominio.</span>
+                    </div>
+
+                    <div class="status-pill">
+                        <span class="dot"></span>
+                        Servidor en línea
+                    </div>
+                </header>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <div class="input-group">
+                    <label>Usuario</label>
+                    <input type="text" name="username" placeholder="Ingrese su usuario" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="password" placeholder="Ingrese su contraseña" required>
+                </div>
+
+                <div class="input-row">
+                    <label class="remember-me">
+                        <input type="checkbox" /> Recordarme
+                    </label>
+                    <div class="forgot-link">
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">Iniciar sesión</button>
+
+                <div class="links">
+                    <a href="#">Ver manual del administrador</a>
+                </div>
+            </form>
+
+                <div class="brand-badge">
+                    <img src="{% static 'images/login.png' %}" alt="Logo">
+                    <span>CondoGest · Panel de administración de condominios</span>
+                </div>
+
+                <div class="logo-floating">
+                    <span>🏢</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

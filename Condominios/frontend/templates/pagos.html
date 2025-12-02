@@ -1,0 +1,376 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Control de Pagos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root{ --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974'); --glass: rgba(255,255,255,0.12); --glass-strong: rgba(255,255,255,0.18); --accent1: #38b6ff; --accent2: #0e77c4; --danger: #e04a4a; --success: #4CAF50; --warning: #FFC107; --text: #ffffff; --muted: rgba(255,255,255,0.85); --radius: 12px; --input-bg: rgba(255,255,255,0.92); --input-text-color: #222; }
+        *{box-sizing:border-box} body{ margin:0; font-family:"Poppins",sans-serif; color:var(--text); background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed; min-height:100vh; padding: 0; }
+        .main-full { min-height: 100vh; padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .search input{ width:100%; padding:10px 12px; border-radius:10px; border:none; outline:none; background: var(--input-bg); color:#222; }
+        .search { flex-grow: 1; max-width: 300px; margin-right: 20px; }
+        .user-menu-container { position: relative; z-index: 100; }
+        .user-avatar-btn {
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+    box-shadow:0 6px 18px rgba(14,119,196,0.18);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    transition: transform 0.15s;
+}
+.user-avatar-btn:hover { transform: scale(1.05); }
+.user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.user-dropdown {
+    position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+    padding: 20px; display: none; flex-direction: column; gap: 15px;
+    animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+}
+.user-dropdown.show { display: flex; }
+@keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+.user-dropdown-header .user-info { flex-grow: 1; min-width: 0; }
+.user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+.user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+.user-dropdown-option:hover { background-color: #e0e0e0; }
+.logout-form { margin: 0; padding: 0; display: block; }
+.user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+.user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+.user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); display: flex; align-items: center; gap: 8px; }
+.user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; transition: color .18s; }
+        .tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+        .tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .kpi-card { padding: 20px; border-radius: 10px; background: var(--glass-strong); }
+        .kpi-label { font-size: 14px; color: var(--muted); margin-bottom: 5px; }
+        .kpi-value { font-size: 28px; font-weight: 700; }
+        @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } }
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table th { text-align:left; padding:15px 18px; color:rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .table td { padding:15px 18px; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-PAGADO { background-color: var(--success); color: white; }
+        .status-PENDIENTE { background-color: var(--warning); color: #333; }
+        .status-VENCIDO { background-color: var(--danger); color: white; }
+        .status-PARCIAL { background-color: #17a2b8; color: white; }
+        .form-control, .form-select { width: 100%; padding: 14px 18px; border-radius: 10px; border: none; outline: none; background: var(--input-bg); color: var(--input-text-color); font-size: 16px; margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; }
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; transition: transform 0.15s; }
+        .big-btn:hover { transform: translateY(-2px); }
+        .receipt-interface { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        @media (max-width: 900px) { .receipt-interface { grid-template-columns: 1fr; } }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; font-weight: 500; }
+        .alert-success { background-color: var(--success); }
+        .alert-error { background-color: var(--danger); }
+        .text-success-bold { color: var(--success); font-weight: 700; }
+        .text-danger-bold { color: var(--danger); font-weight: 700; }
+
+        /* Dropdown (Simplificado para este ejemplo) */
+        .user-dropdown { position: absolute; top: 55px; right: 0; width: 250px; background: white; border-radius: 12px; padding: 15px; display: none; color: #333; }
+        .user-dropdown.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Control de Pagos y Cobros</h1>
+            <div class="search">
+                <form method="get" action="{% url 'dashboard_pagos' %}">
+                    <input type="text" name="q" placeholder="Buscar concepto o nombre..." value="{{ busqueda_actual|default:'' }}">
+                </form>
+            </div>
+             <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    <img src="{% static 'images/login.png' %}" alt="User Avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                        <div class="user-info">
+                            <div class="user-email">admin.condogest@example.com</div>
+                            <div class="user-greeting">¡Hola, Gestor!</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="user-dropdown-option">
+                        <span class="material-icons" style="font-size: 20px;">home</span> Dashboard
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                            <span class="material-icons" style="font-size: 20px;">logout</span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <section id="pagos" class="section active">
+            <div class="card">
+                <h3 style="margin:0">Gestión Financiera</h3>
+                <p class="muted">Cuotas de residentes y pagos de nómina/proveedores.</p>
+
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="estado">Estado de Cuenta</button>
+                    <button class="tab-button" data-tab="historial">Historial Global</button>
+                    <button class="tab-button" data-tab="pago">Registrar Movimiento</button>
+                </div>
+
+                <div class="tab-content active" data-tab-content="estado">
+                    <div class="kpi-grid">
+                        <div class="kpi-card" style="background: rgba(53, 178, 41, 0.2)">
+                            <div class="kpi-label">Ingresos del Mes</div>
+                            <div class="kpi-value" style="color:rgb(78, 225, 65) ;">${{ ingresos_mes|floatformat:2|intcomma }}</div>
+                        </div>
+                        <div class="kpi-card" style="background: rgba(255, 193, 7, 0.2)">
+                            <div class="kpi-label">Deuda Total Residentes</div>
+                            <div class="kpi-value" style="color: var(--warning);">${{ total_pendiente|floatformat:2|intcomma }}</div>
+                        </div>
+                        <div class="kpi-card" style="background: rgba(224, 74, 74, 0.2)">
+                            <div class="kpi-label">Morosos</div>
+                            <div class="kpi-value" style="color: #ff6b6b;">{{ cantidad_morosos }}</div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top:0; color:var(--accent1);">Pagos Pendientes</h4>
+                    <div style="overflow:auto">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Entidad</th><th>Concepto</th><th>Fecha</th><th>Saldo</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for pago in pagos_pendientes %}
+                                <tr>
+                                    <td>
+                                        {% if pago.residente %} {{ pago.residente.unidad_principal }} - {{ pago.residente.nombre_completo }}
+                                        {% elif pago.empleado %} Empleado: {{ pago.empleado.nombre_completo }}
+                                        {% elif pago.proveedor %} Prov: {{ pago.proveedor.nombre_empresa }} {% endif %}
+                                    </td>
+                                    <td>{{ pago.descripcion }}</td>
+                                    <td>{{ pago.fecha_emision|date:"d M Y" }}</td>
+                                    <td>${{ pago.saldo_pendiente|floatformat:2|intcomma }}</td>
+                                    <td><span class="status-badge status-{{ pago.estado }}">{{ pago.get_estado_display }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" style="text-align:center;">No hay pagos pendientes.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-tab-content="historial">
+                    <h4 style="margin-top:0; color:var(--accent1);">Historial Completo</h4>
+                    <div style="overflow:auto">
+                        <table class="table">
+                            <thead><tr><th>Fecha</th><th>Nombre</th><th>Concepto</th><th>Monto</th><th>Método</th></tr></thead>
+                            <tbody>
+                                {% for t in historial_pagos %}
+                                <tr>
+                                    <td>{{ t.fecha_pago|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if t.residente %} {{ t.residente.unidad_principal }}
+                                        {% elif t.empleado %} {{ t.empleado.nombre_completo }} (Emp)
+                                        {% elif t.proveedor %} {{ t.proveedor.nombre_empresa }} (Prov) {% endif %}
+                                    </td>
+                                    <td>{{ t.descripcion }}</td>
+                                    <td class="{% if t.tipo_movimiento == 'INGRESO' %}text-success-bold{% else %}text-danger-bold{% endif %}">
+                                        {% if t.tipo_movimiento == 'EGRESO' %}-{% endif %} ${{ t.monto_pagado|floatformat:2|intcomma }}
+                                    </td>
+                                    <td>{{ t.metodo_pago }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-tab-content="pago">
+                    <h4 style="margin-top:0; color:var(--accent1);">Registrar Transacción</h4>
+                    
+                    <form method="POST" action="{% url 'guardar_pago' %}"> {% csrf_token %}
+                        <div class="receipt-interface">
+                            <div class="registration-col">
+
+                                <div class="form-group" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                                    <label>Tipo de Operación</label>
+                                    <div style="display:flex; gap:15px;">
+                                        <label style="font-weight:400; cursor:pointer;">
+                                            <input type="radio" name="tipo_entidad" value="residente" checked onclick="toggleEntidad('residente')"> Cobro a Residente (Ingreso)
+                                        </label>
+                                        <label style="font-weight:400; cursor:pointer;">
+                                            <input type="radio" name="tipo_entidad" value="empleado" onclick="toggleEntidad('empleado')"> Pago a Empleado
+                                        </label>
+                                        <label style="font-weight:400; cursor:pointer;">
+                                            <input type="radio" name="tipo_entidad" value="proveedor" onclick="toggleEntidad('proveedor')"> Pago a Proveedor
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="group_residente">
+                                    <label>Residente (Pagador)</label>
+                                    <select name="entidad_id" class="form-select" id="input_residente">
+                                        <option value="">Seleccione Unidad...</option>
+                                        {% for r in residentes_list %}
+                                            <option value="{{ r.id }}">{{ r.unidad_principal }} - {{ r.nombre_completo }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="group_empleado" style="display:none;">
+                                    <label>Empleado (Beneficiario)</label>
+                                    <select name="entidad_id" class="form-select" id="input_empleado" disabled>
+                                        <option value="">Seleccione Empleado...</option>
+                                        {% for e in empleados_list %}
+                                            <option value="{{ e.id }}">{{ e.nombre_completo }} - {{ e.puesto }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="group_proveedor" style="display:none;">
+                                    <label>Proveedor (Beneficiario)</label>
+                                    <select name="entidad_id" class="form-select" id="input_proveedor" disabled>
+                                        <option value="">Seleccione Proveedor...</option>
+                                        {% for p in proveedores_list %}
+                                            <option value="{{ p.id }}">{{ p.nombre_empresa }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label>Categoría</label>
+                                        <select name="categoria" class="form-select">
+                                            <option value="CUOTA_ORDINARIA">Cuota Ordinaria</option>
+                                            <option value="CUOTA_EXTRAORDINARIA">Cuota Extra</option>
+                                            <option value="NOMINA">Nómina / Salario</option>
+                                            <option value="MANTENIMIENTO">Mantenimiento</option>
+                                            <option value="SERVICIOS">Pago Servicios</option>
+                                            <option value="OTRO">Otro</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Monto Total ($)</label>
+                                        <input type="number" step="0.01" name="monto_total" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Descripción</label>
+                                    <input type="text" name="descripcion" class="form-control" placeholder="Ej. Cuota Noviembre o Reparación Bomba" required>
+                                </div>
+
+                                <button type="submit" class="big-btn">Registrar Transacción</button>
+                            </div>
+
+                            <div class="receipt-col" style="background: rgba(255,255,255,0.08); padding: 20px; border-radius: 12px;">
+                                <h5 style="color:var(--accent1)">Estado del Pago</h5>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <select name="estado" class="form-select" onchange="toggleMetodoPago(this.value)">
+                                        <option value="PENDIENTE">Pendiente (Por cobrar/pagar)</option>
+                                        <option value="PAGADO">Pagado (Liquidar ahora)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="div_metodo_pago" style="display:none;">
+                                    <label>Método de Pago</label>
+                                    <select name="metodo_pago" class="form-select">
+                                        <option value="TRANSFERENCIA">Transferencia</option>
+                                        <option value="EFECTIVO">Efectivo</option>
+                                        <option value="CHEQUE">Cheque</option>
+                                    </select>
+                                    <div class="form-group" style="margin-top:10px;">
+                                        <label>Monto Pagado Ahora ($)</label>
+                                        <input type="number" step="0.01" name="monto_pagado" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align:center; padding: 20px; color: var(--muted); font-size: 14px;">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.tabs [data-tab="${tabId}"]`).classList.add('active');
+            document.querySelector(`[data-tab-content="${tabId}"]`).classList.add('active');
+        }
+
+        // Lógica para cambiar entre Residente / Empleado / Proveedor
+        function toggleEntidad(tipo) {
+            // Ocultar todos
+            document.getElementById('group_residente').style.display = 'none';
+            document.getElementById('group_empleado').style.display = 'none';
+            document.getElementById('group_proveedor').style.display = 'none';
+
+            // Deshabilitar selects para no enviar datos erróneos
+            document.getElementById('input_residente').disabled = true;
+            document.getElementById('input_empleado').disabled = true;
+            document.getElementById('input_proveedor').disabled = true;
+
+            // Mostrar el seleccionado
+            const group = document.getElementById('group_' + tipo);
+            const input = document.getElementById('input_' + tipo);
+
+            if (group && input) {
+                group.style.display = 'block';
+                input.disabled = false;
+            }
+        }
+
+        function toggleMetodoPago(estado) {
+            const div = document.getElementById('div_metodo_pago');
+            div.style.display = (estado === 'PAGADO') ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('.tabs .tab-button').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
+        // Dropdown Avatar
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if(userAvatarBtn){
+            userAvatarBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) userDropdown.classList.remove('show'); });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('estado');
+            toggleEntidad('residente'); // Default
+        });
+    </script>
+</body>
+</html>

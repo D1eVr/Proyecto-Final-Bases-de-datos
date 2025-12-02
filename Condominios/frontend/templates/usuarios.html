@@ -1,0 +1,384 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CondoGest — Usuarios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+          --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+          --glass: rgba(255,255,255,0.12);
+          --glass-strong: rgba(255,255,255,0.18);
+          --accent1: #38b6ff;
+          --accent2: #0e77c4;
+          --danger: #e04a4a;
+          --text: #ffffff;
+          --muted: rgba(255,255,255,0.85);
+          --radius: 14px;
+        }
+
+        *{box-sizing:border-box;margin:0;padding:0}
+
+        body{
+          font-family:"Poppins",sans-serif;
+          color:var(--text);
+          background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+          min-height:100vh;
+        }
+
+        .wrapper{
+          min-height:100vh;
+          padding:24px;
+          display:flex;
+          flex-direction:column;
+        }
+
+        .topbar{
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:24px;
+        }
+
+        .topbar-title{
+          display:flex;
+          align-items:center;
+          gap:10px;
+        }
+
+        .topbar-title img{
+          width:40px;
+          border-radius:10px;
+        }
+
+        .topbar-title h1{
+          font-size:20px;
+          font-weight:600;
+        }
+
+        .btn{
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          padding:10px 16px;
+          border-radius:10px;
+          border:none;
+          cursor:pointer;
+          font-size:14px;
+          font-weight:600;
+          text-decoration:none;
+          transition:transform .15s, box-shadow .15s, background .15s;
+        }
+
+        .btn-primary{
+          background:linear-gradient(90deg,var(--accent1),var(--accent2));
+          color:#032033;
+          box-shadow:0 8px 18px rgba(0,0,0,0.35);
+        }
+        .btn-primary:hover{ transform:translateY(-1px); }
+
+        .btn-ghost{
+          background:rgba(255,255,255,0.1);
+          color:var(--text);
+        }
+        .btn-ghost:hover{ background:rgba(255,255,255,0.16); }
+
+        .main-card{
+          max-width:900px;
+          margin:0 auto;
+          background:var(--glass-strong);
+          backdrop-filter:blur(14px);
+          border-radius:var(--radius);
+          box-shadow:0 12px 30px rgba(0,0,0,0.45);
+          padding:24px 24px 26px;
+        }
+
+        .main-card-header{
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          gap:16px;
+          margin-bottom:16px;
+        }
+
+        .main-card-header h2{
+          font-size:18px;
+          margin-bottom:6px;
+        }
+
+        .main-card-header p{
+          font-size:13px;
+          color:var(--muted);
+        }
+
+        .messages{
+          margin-bottom:16px;
+        }
+        .msg{
+          padding:10px 12px;
+          border-radius:10px;
+          font-size:13px;
+          margin-bottom:6px;
+          background:rgba(0,0,0,0.35);
+        }
+        .msg-success{ border:1px solid rgba(34,197,94,0.8); }
+        .msg-error{ border:1px solid rgba(239,68,68,0.9); }
+
+        form{
+          margin-top:8px;
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:14px 18px;
+        }
+
+        @media (max-width:720px){
+          .main-card{ padding:18px; }
+          form{ grid-template-columns:1fr; }
+          .topbar{ flex-direction:column; align-items:flex-start; gap:10px; }
+        }
+
+        .field{
+          display:flex;
+          flex-direction:column;
+          gap:4px;
+          font-size:13px;
+        }
+
+        .field label{
+          font-weight:500;
+        }
+
+        .field input,
+        .field select{
+          border:none;
+          border-radius:10px;
+          padding:10px 12px;
+          background:rgba(255,255,255,0.92);
+          font-family:inherit;
+          font-size:14px;
+          color:#111827;
+          outline:none;
+        }
+
+        .field-hint{
+          font-size:11px;
+          color:var(--muted);
+        }
+
+        .form-footer{
+          grid-column:1 / -1;
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          margin-top:4px;
+        }
+
+        .section-title{
+          font-size:15px;
+          font-weight:600;
+          margin-bottom:6px;
+        }
+
+        footer{
+          margin-top:auto;
+          padding:16px 0 4px;
+          text-align:center;
+          font-size:12px;
+          color:rgba(255,255,255,0.7);
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-title">
+            <img src="{% static 'images/login.png' %}" alt="CondoGest">
+            <div>
+                <h1>Gestión de Usuarios</h1>
+                <span style="font-size:13px;color:var(--muted);">
+                    Alta de cuentas y asignación de roles.
+                </span>
+            </div>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost">← Volver al Dashboard</a>
+    </header>
+
+    <!-- Card principal -->
+    <main>
+        <section class="main-card">
+
+            <div class="main-card-header">
+                <div>
+                    <h2>
+                        {% if usuario_seleccionado %}
+                            Edición de usuario
+                        {% else %}
+                            Administración de cuentas de acceso
+                        {% endif %}
+                    </h2>
+                    <p>
+                        {% if usuario_seleccionado %}
+                            Estás modificando los datos de acceso de un usuario existente.
+                        {% else %}
+                            Puedes crear nuevos usuarios para el sistema.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="msg {% if message.tags == 'success' %}msg-success{% elif 'error' in message.tags %}msg-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# SOLO UN FORMULARIO A LA VEZ #}
+            {% if not usuario_seleccionado %}
+            <!-- ================== CREAR USUARIO ================== -->
+            <div>
+                <div class="section-title">Crear nuevo usuario</div>
+                <p class="field-hint" style="margin-bottom:8px;">
+                    Usuario sin espacios y correo con “@”. El rol por defecto suele ser residente.
+                </p>
+
+                <form method="post" action="{% url 'dashboard_usuarios' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="create">
+
+                    <!-- Usuario sin espacios -->
+                    <div class="field">
+                        <label for="id_username">Usuario</label>
+                        <input id="id_username"
+                               type="text"
+                               name="username"
+                               maxlength="150"
+                               required
+                               placeholder="ej. j.lopez"
+                               pattern="^\S+$"
+                               oninput="this.value = this.value.replace(/\s/g, '');"
+                               title="El nombre de usuario no puede contener espacios.">
+                        <span class="field-hint">Sin espacios. Se usará para iniciar sesión.</span>
+                    </div>
+
+                    <!-- Email con @ obligatorio -->
+                    <div class="field">
+                        <label for="id_email">Correo electrónico</label>
+                        <input id="id_email"
+                               type="email"
+                               name="email"
+                               required
+                               placeholder="correo@ejemplo.com"
+                               pattern=".*@.*"
+                               title="El correo debe contener un @ válido.">
+                        <span class="field-hint">Correo de contacto del usuario.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="id_password">Contraseña</label>
+                        <input id="id_password" type="password" name="password" required>
+                        <span class="field-hint">Comparte la contraseña con el usuario por un canal seguro.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="id_rol">Rol</label>
+                        <select id="id_rol" name="rol">
+                            {% for value,label in ROL_CHOICES %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="field-hint">El rol define los permisos dentro del sistema.</span>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="reset" class="btn btn-ghost">Limpiar</button>
+                        <button type="submit" class="btn btn-primary">Crear usuario</button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <!-- ================== EDITAR USUARIO ================== -->
+            <div>
+                <div class="section-title">Gestión avanzada</div>
+                <p class="field-hint" style="margin-bottom:8px;">
+                    Editando al usuario <strong>{{ usuario_seleccionado.username }}</strong>.
+                    Puedes cambiar su nombre de usuario, correo, contraseña y rol.
+                </p>
+
+                <form method="post" action="{% url 'dashboard_usuarios' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="update">
+                    <input type="hidden" name="user_id" value="{{ usuario_seleccionado.id }}">
+
+                    <div class="field">
+                        <label for="edit_username">Usuario</label>
+                        <input id="edit_username"
+                               type="text"
+                               name="username"
+                               maxlength="150"
+                               required
+                               value="{{ usuario_seleccionado.username }}"
+                               pattern="^\S+$"
+                               oninput="this.value = this.value.replace(/\s/g, '');"
+                               title="El nombre de usuario no puede contener espacios.">
+                        <span class="field-hint">No se permiten espacios.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="edit_email">Correo electrónico</label>
+                        <input id="edit_email"
+                               type="email"
+                               name="email"
+                               required
+                               value="{{ usuario_seleccionado.email }}"
+                               pattern=".*@.*"
+                               title="El correo debe contener un @ válido.">
+                        <span class="field-hint">Debe contener “@”.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="edit_password">Nueva contraseña</label>
+                        <input id="edit_password"
+                               type="password"
+                               name="password"
+                               placeholder="Dejar en blanco para no cambiar">
+                        <span class="field-hint">Si la dejas vacía, se mantiene la contraseña actual.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="edit_rol">Rol</label>
+                        <select id="edit_rol" name="rol">
+                            {% for value,label in ROL_CHOICES %}
+                                <option value="{{ value }}"
+                                    {% if perfil_seleccionado and perfil_seleccionado.rol == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="field-hint">Puedes subirlo a administrador si lo requiere.</span>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+        </section>
+    </main>
+
+    <footer>© CondoGest</footer>
+</div>
+</body>
+</html>

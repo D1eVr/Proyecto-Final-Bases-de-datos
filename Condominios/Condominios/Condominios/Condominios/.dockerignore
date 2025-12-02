@@ -1,0 +1,24 @@
+
+data/
+data/db/
+data/db/mysql.sock
+
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+env/
+.venv/
+
+.git/
+.gitignore
+
+*.log
+*.sqlite3
+
+# Otros
+.DS_Store
+Thumbs.db

@@ -1,0 +1,430 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Gestión de Solicitudes y Tickets</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+            --glass: rgba(255,255,255,0.12);
+            --glass-strong: rgba(255,255,255,0.18);
+            --accent1: #38b6ff;
+            --accent2: #0e77c4;
+            --danger: #e04a4a;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --primary: var(--accent1);
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.85);
+            --radius: 12px;
+            --input-bg: rgba(255,255,255,0.92);
+            --input-bg-dark: rgba(255,255,255,0.06);
+            --input-text-color: #222;
+        }
+
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font-family:"Poppins",sans-serif;
+            color:var(--text);
+            background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+            min-height:100vh;
+            overflow-x:hidden;
+            padding: 0;
+        }
+
+        .main-full {
+            min-height: 100vh;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (max-width: 600px) { .main-full { padding: 16px; } }
+
+        .topbar {
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            margin-bottom:24px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+
+        /* USER MENU */
+        .user-menu-container { position: relative; z-index: 100; }
+        .user-avatar-btn {
+            width:44px;height:44px;border-radius:50%;
+            background:linear-gradient(135deg,var(--accent1),var(--accent2));
+            display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+            box-shadow:0 6px 18px rgba(14,119,196,0.18);
+            cursor: pointer; border: none; padding: 0; font-size: 18px; transition: transform 0.15s;
+        }
+        .user-avatar-btn:hover { transform: scale(1.05); }
+        .user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .user-dropdown {
+            position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+            padding: 20px; display: none; flex-direction: column; gap: 15px;
+            animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+        }
+        .user-dropdown.show { display: flex; }
+        @keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+        .user-dropdown-header .user-info { flex-grow: 1; }
+        .user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+        .user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+        .user-dropdown-option:hover { background-color: #e0e0e0; }
+        .user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+        .user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+        .logout-form { margin: 0; padding: 0; display: block; }
+        .user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); }
+        .user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+        /* CARD & UTILS */
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table thead th { text-align:left; padding:15px 18px; font-size:15px; color:rgba(255,255,255,0.9) }
+        .table tbody td { padding:15px 18px; font-size:16px; border-top:1px solid rgba(255,255,255,0.06) }
+        
+        .small-btn { padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px; background: rgba(255,255,255,0.08); color:var(--text); transition: background .18s; text-decoration: none; display: inline-block;}
+        .small-btn.edit{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#032033; font-weight:600; }
+        .small-btn.del{ background: rgba(224,74,74,0.95); color:white; }
+        .small-btn.close-ticket{ background: var(--success); color: white; }
+
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; box-shadow: 0 4px 12px rgba(14,119,196,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+        .big-btn.cancel { background: rgba(255,255,255,0.15); color: var(--text); box-shadow: none; text-decoration: none; display: inline-block; text-align: center;}
+        
+        .form-control, .form-select { width: 100%; padding: 14px 18px; border-radius: 10px; border: none; outline: none; font-family: "Poppins", sans-serif; font-size: 16px; background: var(--input-bg); color: var(--input-text-color); font-weight: 500; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .form-select option { color: #000 !important; }
+ 
+        .form-group label { display: block; margin-bottom: 6px; font-size: 16px; font-weight: 600; color: var(--text); }
+        
+        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; transition: color .18s; }
+        .tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+        .tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+        .tab-content.active { display: block; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        .section { animation: fadeIn .28s ease forwards; }
+
+        .status-badge { display: inline-block; padding: 6px 10px; border-radius: 6px; font-size: 14px; font-weight: 600; min-width: 80px; text-align: center; }
+        .status-ABIERTO { background-color: var(--danger); color: white; }
+        .status-EN_PROCESO { background-color: var(--warning); color: #333; }
+        .status-ESPERANDO_REPUESTO { background-color: #ff9800; color: white; }
+        .status-CERRADO { background-color: var(--success); color: white; }
+        .priority-ALTA, .priority-EMERGENCIA { color: var(--danger); font-weight: 700; }
+        .priority-MEDIA { color: var(--primary); }
+        .priority-BAJA { color: #88cf8b; }
+
+        /* Ticket Detail Specifics */
+        .ticket-detail-view { background: rgba(255,255,255,0.08); padding: 25px; border-radius: 12px; margin-top: 20px; }
+        .ticket-metadata { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .metadata-item strong { display: block; font-size: 16px; color: var(--text); margin-top: 2px; }
+        @media (max-width: 768px) { .ticket-metadata { grid-template-columns: 1fr 1fr; } }
+        
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; font-weight: 500; }
+        .alert-success { background-color: var(--success); }
+        .alert-error { background-color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Gestión de Solicitudes y Tickets</h1>
+            
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    <img src="{% static 'images/login.png' %}" alt="User Avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                        <div class="user-info">
+                            <div class="user-email">admin.condogest@example.com</div>
+                            <div class="user-greeting">¡Hola, Gestor!</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="user-dropdown-option">
+                        <span class="material-icons" style="font-size: 20px;">home</span> Dashboard
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                            <span class="material-icons" style="font-size: 20px;">logout</span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section id="tickets" class="section active">
+            <div class="card">
+                <h3 style="margin:0">Seguimiento de Incidencias</h3>
+                <p class="muted">Registro, seguimiento, asignación y cierre de tickets de mantenimiento.</p>
+
+                <div class="tabs">
+                    <button class="tab-button {% if active_tab == 'listado' %}active{% endif %}" onclick="location.href='?tab=listado'">Listado de Tickets</button>
+                    <button class="tab-button {% if active_tab == 'crear' %}active{% endif %}" onclick="switchTab('crear')">Crear Nuevo Ticket</button>
+                    {% if ticket_seleccionado %}
+                        <button class="tab-button active" data-tab="detalle">Detalle Ticket #{{ ticket_seleccionado.id }}</button>
+                    {% endif %}
+                </div>
+
+                <div class="tab-content {% if active_tab == 'listado' %}active{% endif %}" data-tab-content="listado">
+                    <div style="margin-bottom: 20px;">
+                        <form method="GET" style="display:inline;">
+                            <select name="estado" class="form-select" style="width: 200px; padding: 10px; font-size: 14px; display: inline-block; margin-bottom:0;" onchange="this.form.submit()">
+                                <option value="TODOS">Mostrar todos</option>
+                                <option value="ABIERTO" {% if request.GET.estado == 'ABIERTO' %}selected{% endif %}>Abiertos</option>
+                                <option value="EN_PROCESO" {% if request.GET.estado == 'EN_PROCESO' %}selected{% endif %}>En Progreso</option>
+                                <option value="CERRADO" {% if request.GET.estado == 'CERRADO' %}selected{% endif %}>Cerrados</option>
+                            </select>
+                        </form>
+                        <button class="small-btn edit" onclick="switchTab('crear')" style="margin-left: 10px;">➕ Crear Ticket Rápido</button>
+                    </div>
+
+                    <div style="overflow:auto">
+                        <table class="table" id="tblTickets">
+                            <thead><tr><th>ID</th><th>Asunto</th><th>Unidad</th><th>Prioridad</th><th>Asignado a</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                                {% for ticket in tickets %}
+                                <tr>
+                                    <td>#{{ ticket.id }}</td>
+                                    <td>{{ ticket.asunto }}</td>
+                                    <td>{{ ticket.residente.unidad_principal }}</td>
+                                    <td><span class="priority-{{ ticket.prioridad }}">{{ ticket.get_prioridad_display }}</span></td>
+                                    <td>
+                                        {% if ticket.empleado_asignado %}
+                                            {{ ticket.empleado_asignado.nombre_completo }}
+                                        {% elif ticket.proveedor_asignado %}
+                                            {{ ticket.proveedor_asignado.nombre_empresa }}
+                                        {% else %}
+                                            <span style="color:var(--muted)">--</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="status-badge status-{{ ticket.estado }}">{{ ticket.get_estado_display }}</span></td>
+                                    <td>
+                                        <a href="?ticket_id={{ ticket.id }}" class="small-btn edit">Ver / Asignar</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" style="text-align:center;">No hay tickets registrados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'crear' %}active{% endif %}" data-tab-content="crear">
+                    <h4 style="margin-top:0; color:var(--accent1);">Formulario de Creación de Incidencia</h4>
+                    
+                    <form method="POST" action="{% url 'crear_ticket' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="asunto">Asunto / Título del Ticket</label>
+                                <input type="text" name="asunto" class="form-control" placeholder="Ej. Falla en aire acondicionado" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="residente_id">Unidad/Área afectada</label>
+                                <select name="residente_id" class="form-select" required>
+                                    <option value="">Seleccione Unidad...</option>
+                                    {% for res in residentes %}
+                                        <option value="{{ res.id }}" style="color:000;">{{ res.unidad_principal }} - {{ res.nombre_completo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="descripcion">Descripción Detallada</label>
+                            <textarea name="descripcion" class="form-control" rows="4" placeholder="Describa el problema..."></textarea>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="prioridad">Prioridad</label>
+                                <select name="prioridad" class="form-select">
+                                    {% for code, name in prioridades %}
+                                        <option value="{{ code }}">{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Adjuntar Evidencia (Opcional)</label>
+                                <input type="file" name="archivo" class="form-control" style="padding: 10px; background: var(--input-bg-dark); color: var(--text);">
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                            <button type="button" class="big-btn cancel" onclick="location.href='?tab=listado'">Cancelar</button>
+                            <button type="submit" class="big-btn">Registrar Solicitud</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if ticket_seleccionado %}
+                <div class="tab-content active" data-tab-content="detalle">
+                    <div class="detail-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:var(--accent1);">Ticket #{{ ticket_seleccionado.id }}: {{ ticket_seleccionado.asunto }}</h4>
+                        <a href="?tab=listado" class="big-btn cancel">← Volver al Listado</a>
+                    </div>
+                    
+                    <h5 style="margin-top:0; color:var(--muted)">Información de Seguimiento</h5>
+                    
+                    <div class="ticket-detail-view">
+                        <div class="ticket-metadata">
+                            <div class="metadata-item">
+                                Unidad: <strong>{{ ticket_seleccionado.residente.unidad_principal }}</strong>
+                            </div>
+                            <div class="metadata-item">
+                                Solicitado por: <strong>{{ ticket_seleccionado.residente.nombre_completo }}</strong>
+                            </div>
+                            <div class="metadata-item">
+                                Prioridad: <strong class="priority-{{ ticket_seleccionado.prioridad }}">{{ ticket_seleccionado.get_prioridad_display }}</strong>
+                            </div>
+                            <div class="metadata-item">
+                                Apertura: <strong>{{ ticket_seleccionado.fecha_creacion|date:"Y-m-d H:i" }}</strong>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <label style="font-size: 16px; font-weight: 600;">Descripción:</label>
+                            <p style="margin-top: 5px; color: var(--muted); white-space: pre-wrap;">{{ ticket_seleccionado.descripcion }}</p>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+
+                        <h5 style="color:var(--primary); margin-bottom: 15px;">Control de Tarea</h5>
+                        <form method="POST" action="{% url 'actualizar_ticket' ticket_seleccionado.id %}">
+                            {% csrf_token %}
+                            
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Tipo de Asignación</label>
+                                    <select name="asignado_tipo" class="form-select" id="asignTipo" onchange="toggleAsignacion()">
+                                        <option value="empleado" {% if ticket_seleccionado.empleado_asignado %}selected{% endif %}>Empleado Interno</option>
+                                        <option value="proveedor" {% if ticket_seleccionado.proveedor_asignado %}selected{% endif %}>Proveedor Externo</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Asignar a:</label>
+                                    <select name="asignado_id" id="selEmpleado" class="form-select" {% if ticket_seleccionado.proveedor_asignado %}style="display:none"{% endif %}>
+                                        <option value="">-- Seleccione Empleado --</option>
+                                        {% for emp in empleados %}
+                                            <option value="{{ emp.id }}" {% if ticket_seleccionado.empleado_asignado.id == emp.id %}selected{% endif %}>{{ emp.nombre_completo }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <select name="asignado_id" id="selProveedor" class="form-select" {% if not ticket_seleccionado.proveedor_asignado %}style="display:none"{% endif %} {% if ticket_seleccionado.proveedor_asignado %}name="asignado_id"{% else %}disabled{% endif %}>
+                                        <option value="">-- Seleccione Proveedor --</option>
+                                        {% for prov in proveedores %}
+                                            <option value="{{ prov.id }}" {% if ticket_seleccionado.proveedor_asignado.id == prov.id %}selected{% endif %}>{{ prov.nombre_empresa }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="estado">Cambiar Estado</label>
+                                <select name="estado" class="form-select">
+                                    <option value="ABIERTO" {% if ticket_seleccionado.estado == 'ABIERTO' %}selected{% endif %}>Abierto</option>
+                                    <option value="EN_PROCESO" {% if ticket_seleccionado.estado == 'EN_PROCESO' %}selected{% endif %}>En Progreso</option>
+                                    <option value="ESPERANDO_REPUESTO" {% if ticket_seleccionado.estado == 'ESPERANDO_REPUESTO' %}selected{% endif %}>Esperando Repuesto</option>
+                                    <option value="CERRADO" {% if ticket_seleccionado.estado == 'CERRADO' %}selected{% endif %}>Cerrado</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Agregar Notas de Avance</label>
+                                <textarea name="notas" class="form-control" rows="3" placeholder="Escriba aquí actualizaciones del trabajo..."></textarea>
+                            </div>
+
+                            <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                                <button type="submit" class="big-btn">Guardar Cambios</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+        <footer class="page-footer" style="text-align:center; padding: 20px; color: var(--muted);">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        // --- FUNCIONES DE TABS (PESTAÑAS) ---
+        // Ahora usamos lógica de servidor (recargas), pero mantenemos esto para la pestaña "Crear"
+        function switchTab(tabId) {
+            // Ocultar todas
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            // Mostrar la deseada
+            const btn = document.querySelector(`.tabs .tab-button[onclick*="'${tabId}'"]`) || document.querySelector(`.tabs .tab-button`);
+            const content = document.querySelector(`[data-tab-content="${tabId}"]`);
+            
+            if(btn) btn.classList.add('active');
+            if(content) content.classList.add('active');
+        }
+
+        // Lógica simple para cambiar selects de asignación
+        function toggleAsignacion() {
+            const tipo = document.getElementById('asignTipo').value;
+            const selEmp = document.getElementById('selEmpleado');
+            const selProv = document.getElementById('selProveedor');
+
+            if (tipo === 'empleado') {
+                selEmp.style.display = 'block';
+                selEmp.disabled = false;
+                selProv.style.display = 'none';
+                selProv.disabled = true; // Para que no se envíe en el POST
+            } else {
+                selEmp.style.display = 'none';
+                selEmp.disabled = true;
+                selProv.style.display = 'block';
+                selProv.disabled = false;
+            }
+        }
+
+        // Dropdown usuario
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if(userAvatarBtn){
+            userAvatarBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', (event) => {
+                if (!userDropdown.contains(event.target) && !userAvatarBtn.contains(event.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

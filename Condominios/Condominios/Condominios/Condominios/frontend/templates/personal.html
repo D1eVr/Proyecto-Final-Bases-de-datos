@@ -1,0 +1,436 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Personal y Proveedores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root{ --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974'); --glass: rgba(255,255,255,0.12); --glass-strong: rgba(255,255,255,0.18); --accent1: #38b6ff; --accent2: #0e77c4; --danger: #e04a4a; --success: #4CAF50; --warning: #FFC107; --primary: var(--accent1); --text: #ffffff; --muted: rgba(255,255,255,0.85); --radius: 12px; --input-bg: rgba(255,255,255,0.92); --input-bg-dark: rgba(255,255,255,0.06); --input-text-color: #222; }
+        *{box-sizing:border-box} body{ margin:0; font-family:"Poppins",sans-serif; color:var(--text); background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed; min-height:100vh; overflow-x:hidden; padding: 0; }
+        .main-full { min-height: 100vh; padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .topbar { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:24px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .user-menu-container { position: relative; z-index: 100; }
+        /* Dropdown */
+.user-menu-container { position: relative; z-index: 100; }
+.user-avatar-btn {
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+    box-shadow:0 6px 18px rgba(14,119,196,0.18);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    transition: transform 0.15s;
+}
+.user-avatar-btn:hover { transform: scale(1.05); }
+.user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.user-dropdown {
+    position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+    padding: 20px; display: none; flex-direction: column; gap: 15px;
+    animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+}
+.user-dropdown.show { display: flex; }
+@keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+.user-dropdown-header .user-info { flex-grow: 1; min-width: 0; }
+.user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+.user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+.user-dropdown-option:hover { background-color: #e0e0e0; }
+.logout-form { margin: 0; padding: 0; display: block; }
+.user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+.user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+.user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); display: flex; align-items: center; gap: 8px; }
+.user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table thead th { text-align:left; padding:15px 18px; font-size:15px; color:rgba(255,255,255,0.9) }
+        .table tbody td { padding:15px 18px; font-size:16px; border-top:1px solid rgba(255,255,255,0.06) }
+        
+        .small-btn { padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px; background: rgba(255,255,255,0.08); color:var(--text); text-decoration: none; display: inline-block;}
+        .small-btn.edit{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#032033; font-weight:600; }
+        .small-btn.del{ background: rgba(224,74,74,0.95); color:white; }
+
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; transition: transform 0.15s; }
+        .big-btn:hover { transform: translateY(-2px); }
+        .big-btn.cancel { background: rgba(255,255,255,0.15); color: var(--text); }
+        
+        .form-control, .form-select { width: 100%; padding: 14px 18px; border-radius: 10px; border: none; outline: none; font-family: "Poppins", sans-serif; font-size: 16px; background: var(--input-bg); color: var(--input-text-color); margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 16px; font-weight: 600; }
+        
+        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; }
+        .tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+        .tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+        .tab-content.active { display: block; }
+
+        .sub-tabs { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px; }
+        .sub-tab-button { background: var(--glass); color: var(--muted); padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; }
+        .sub-tab-button.active { background: var(--glass-strong); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .sub-tab-content { display: none; padding: 10px 0; }
+        .sub-tab-content.active { display: block; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        .section { animation: fadeIn .28s ease forwards; }
+        
+        /* Mensajes */
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; font-weight: 500; }
+        .alert-success { background-color: var(--success); }
+        .alert-error { background-color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Administración de Personal y Proveedores</h1>
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    <img src="{% static 'images/login.png' %}" alt="User Avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                        <div class="user-info">
+                            <div class="user-email">admin.condogest@example.com</div>
+                            <div class="user-greeting">¡Hola, Gestor!</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="user-dropdown-option">
+                        <span class="material-icons" style="font-size: 20px;">home</span> Dashboard
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                            <span class="material-icons" style="font-size: 20px;">logout</span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section id="personal" class="section active">
+            <div class="card">
+                <h3 style="margin:0">Gestión de Personal</h3>
+                <p class="muted">Registro, edición y seguimiento de contratos, tareas y servicios.</p>
+
+                <div class="tabs">
+                    <button class="tab-button {% if active_tab == 'listado' %}active{% endif %}" onclick="location.href='?tab=listado'">Listado General</button>
+                    <button class="tab-button {% if active_tab == 'registro' %}active{% endif %}" onclick="switchTab('registro')">Registrar Nuevo</button>
+                    {% if seleccionado %}
+                    <button class="tab-button active" data-tab="detalle">
+                        Gestión:
+                        {% if seleccionado.nombre_completo %}
+                            {{ seleccionado.nombre_completo }}
+                        {% else %}
+                            {{ seleccionado.nombre_empresa }}
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="tab-content {% if active_tab == 'listado' %}active{% endif %}" data-tab-content="listado">
+                    <div style="position: relative; margin-bottom: 20px;">
+                        <span class="material-icons" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent2);">search</span>
+                        <input type="text" id="searchInput" class="form-control"
+                                style="padding-left: 45px; margin-bottom: 0; background: rgba(255,255,255,0.95);"
+                                placeholder="Buscar por nombre, empresa, servicio o contacto...">
+                    </div>
+                    <div style="overflow:auto">
+                        <table class="table">
+                            <thead><tr><th>Nombre/Empresa</th><th>Tipo</th><th>Rol/Servicio</th><th>Contacto</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                                {% for emp in empleados %}
+                                <tr>
+                                    <td>{{ emp.nombre_completo }}</td>
+                                    <td><span style="color:var(--accent1); font-weight:bold;">Empleado</span></td>
+                                    <td>{{ emp.puesto }}</td>
+                                    <td>{{ emp.telefono }}</td>
+                                    <td>{{ emp.estado }}</td>
+                                    <td>
+    <div style="display:flex; gap:5px;">
+        <a href="?tipo=empleado&id={{ emp.id }}" class="small-btn edit">Gestionar</a>
+
+        <form method="POST" action="{% url 'eliminar_personal' %}" onsubmit="return confirm('¿Estás seguro de eliminar a {{ emp.nombre_completo }}?');" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="obj_id" value="{{ emp.id }}">
+            <input type="hidden" name="tipo_entidad" value="empleado">
+            <button type="submit" class="small-btn del" title="Eliminar">
+                <span class="material-icons" style="font-size:14px; vertical-align:middle;">delete</span>
+            </button>
+        </form>
+    </div>
+</td>
+                                </tr>
+                                {% endfor %}
+
+                                {% for prov in proveedores %}
+                                <tr>
+                                    <td>{{ prov.nombre_empresa }}</td>
+                                    <td><span style="color:#FFC107; font-weight:bold;">Proveedor</span></td>
+                                    <td>{{ prov.tipo_servicio }}</td>
+                                    <td>{{ prov.telefono_contacto }}</td>
+                                    <td>{{ prov.estado }}</td>
+                                    <td>
+                                        <a href="?tipo=proveedor&id={{ prov.id }}" class="small-btn edit">Gestionar</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'registro' %}active{% endif %}" data-tab-content="registro">
+                    <h4 style="margin-top:0; color:var(--accent1);">Formulario de Registro</h4>
+                    
+                    <form method="POST" action="{% url 'crear_personal' %}">
+                        {% csrf_token %}
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej. Juan Pérez / Limpieza S.A." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Entidad</label>
+                                <select name="tipo_entidad" class="form-select">
+                                    <option value="empleado">Empleado Interno</option>
+                                    <option value="proveedor">Proveedor / Contratista</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Rol / Servicio Principal</label>
+                                <input type="text" name="rol" class="form-control" placeholder="Ej. Vigilante / Jardinería" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" name="contacto" class="form-control" placeholder="Contacto principal">
+                            </div>
+                        </div>
+                        
+                        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                            <button type="button" class="big-btn cancel" onclick="location.href='?tab=listado'">Cancelar</button>
+                            <button type="submit" class="big-btn">Guardar Registro</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if seleccionado %}
+                <div class="tab-content active" data-tab-content="detalle">
+                    <div class="detail-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; color:var(--accent1);">
+                            {% if tipo_seleccionado == 'empleado' or request.GET.tipo == 'empleado' %}
+                                Empleado: {{ seleccionado.nombre_completo }}
+                            {% else %}
+                                Proveedor: {{ seleccionado.nombre_empresa }}
+                            {% endif %}
+                        </h4>
+                        <a href="?tab=listado" class="big-btn cancel">← Volver al Listado</a>
+                    </div>
+                    
+                    <div class="sub-tabs">
+                        <button class="sub-tab-button active" onclick="switchSubTab('datos')">Datos Generales</button>
+                        <button class="sub-tab-button" onclick="switchSubTab('tareas')">Tareas & Tickets</button>
+                        <button class="sub-tab-button" onclick="switchSubTab('contratos')">Documentos</button>
+                    </div>
+
+                    <div class="sub-tab-content active" id="subtab-datos">
+                        <form method="POST" action="{% url 'actualizar_personal' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="tipo_entidad" value="{{ tipo_seleccionado }}">
+                            <input type="hidden" name="obj_id" value="{{ seleccionado.id }}">
+                            
+                            <h5 style="color:var(--muted)">Edición de Información</h5>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Rol / Servicio Actual</label>
+                                    <input type="text" name="rol" class="form-control" 
+                                           value="{% if tipo_seleccionado == 'empleado' %}{{ seleccionado.puesto }}{% else %}{{ seleccionado.tipo_servicio }}{% endif %}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <select name="estado" class="form-select">
+                                        <option value="ACTIVO" {% if seleccionado.estado == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                                        <option value="INACTIVO" {% if seleccionado.estado == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="big-btn">Actualizar Datos</button>
+                            <div style="margin-top: 30px; padding: 20px; border: 1px solid rgba(224, 74, 74, 0.3); border-radius: 12px; background: rgba(224, 74, 74, 0.05);">
+    <h5 style="color: var(--danger); margin-top: 0; display:flex; align-items:center; gap:8px;">
+        <span class="material-icons">warning</span> Zona de Peligro
+    </h5>
+    <p style="font-size: 0.9em; color: var(--muted); margin-bottom: 15px;">
+        Eliminar este empleado borrará permanentemente su registro y desvinculará sus tareas.
+    </p>
+
+    <form method="POST" action="{% url 'eliminar_personal' %}">
+        {% csrf_token %}
+        <input type="hidden" name="tipo_entidad" value="{{ tipo_seleccionado }}">
+        <input type="hidden" name="obj_id" value="{{ seleccionado.id }}">
+
+        <button type="submit" class="big-btn"
+                style="background: var(--danger); color: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;"
+                onclick="return confirm('¿CONFIRMAR ELIMINACIÓN?\n\nEsta acción es irreversible y borrará a: \n{{ seleccionado.nombre_completo|default:seleccionado.nombre_empresa }}');">
+            <span class="material-icons">delete_forever</span> Eliminar Definitivamente
+        </button>
+    </form>
+</div>
+                        </form>
+                    </div>
+
+                    <div class="sub-tab-content" id="subtab-tareas">
+                        <h5 style="color:var(--muted)">Tickets y Tareas Asignadas</h5>
+                        <table class="table">
+                            <thead><tr><th>ID Ticket</th><th>Asunto</th><th>Estado</th></tr></thead>
+                            <tbody>
+                                {% for t in tickets %}
+                                <tr>
+                                    <td>#{{ t.id }}</td>
+                                    <td>{{ t.asunto }}</td>
+                                    <td>{{ t.estado }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3">No tiene tickets activos asignados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sub-tab-content" id="subtab-contratos">
+                        <h5 style="color:var(--muted)">Documentación Legal</h5>
+                        <table class="table" style="margin-bottom:20px;">
+                            <thead><tr><th>Documento</th><th>Fecha Subida</th><th>Acción</th></tr></thead>
+                            <tbody>
+                                {% for c in contratos %}
+                                <tr>
+                                    <td>{{ c.tipo_contrato }}</td>
+                                    <td>{{ c.fecha_inicio }}</td>
+                                    <td><button class="small-btn">Descargar</button></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3">No hay documentos registrados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div style="background: rgba(255,255,255,0.08); padding: 20px; border-radius: 12px;">
+                            <h5 style="color:var(--text); margin-top:0;">Subir Nuevo Documento</h5>
+                            <form method="POST" action="{% url 'subir_contrato' %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo_entidad" value="{{ tipo_seleccionado }}">
+                                <input type="hidden" name="obj_id" value="{{ seleccionado.id }}">
+                                
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <input type="text" name="nombre_doc" placeholder="Nombre (Ej. Contrato 2025)" class="form-control" style="flex:1; min-width:200px; margin-bottom:0;">
+                                    <input type="date" name="fecha_fin" class="form-control" style="width:auto; margin-bottom:0;" title="Fecha Vencimiento">
+                                    <input type="file" name="archivo" class="form-control" style="width:auto; margin-bottom:0;">
+                                    <button type="submit" class="big-btn" style="padding: 10px 20px;">Subir</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+        <footer style="text-align:center; padding: 20px; color: var(--muted);">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+
+        // Buscador
+        const searchInput = document.getElementById('searchInput');
+
+            if(searchInput){
+                searchInput.addEventListener('keyup', function() {
+                    const filter = this.value.toLowerCase();
+                    const table = document.querySelector('.table tbody');
+                    const rows = table.getElementsByTagName('tr');
+
+                    for (let i = 0; i < rows.length; i++) {
+                         // Obtenemos todo el texto de la fila
+                        const rowText = rows[i].textContent.toLowerCase();
+
+                        // Si el texto de la fila incluye lo que escribimos, se muestra, si no, se oculta
+                        if (rowText.includes(filter)) {
+                            rows[i].style.display = "";
+                        } else {
+                            rows[i].style.display = "none";
+                        }
+                    }
+            });
+        }
+
+        // Función simple para cambiar pestañas de registro
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            // Busca el botón que corresponda (para registro es manual)
+            const content = document.querySelector(`[data-tab-content="${tabId}"]`);
+            if(content) content.classList.add('active');
+            
+            // Si es botón manual en la barra
+            const btn = document.querySelector(`.tabs .tab-button[onclick*="'${tabId}'"]`);
+            if(btn) btn.classList.add('active');
+        }
+
+        // Función para cambiar sub-pestañas (Datos / Tareas / Documentos)
+        function switchSubTab(subTabId) {
+            // Quitar active de todos los botones sub
+            document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+            // Quitar active de todos los contenidos sub
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.style.display = 'none'); // Reset display
+
+            // Activar el clickeado
+            event.target.classList.add('active');
+            document.getElementById('subtab-' + subTabId).style.display = 'block';
+        }
+        // Lógica del Dropdown del Avatar
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        userAvatarBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', (event) => {
+            if (!userDropdown.contains(event.target) && !userAvatarBtn.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // Inicializar sub-tabs (mostrar la primera por defecto si estamos en detalle)
+        document.addEventListener('DOMContentLoaded', () => {
+            if(document.getElementById('subtab-datos')) {
+                document.getElementById('subtab-datos').style.display = 'block';
+                document.getElementById('subtab-tareas').style.display = 'none';
+                document.getElementById('subtab-contratos').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CondoGest — Gestión de Residentes</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+/* Variables CSS */
+:root {
+    --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+    --glass: rgba(255,255,255,0.12);
+    --glass-strong: rgba(255,255,255,0.18);
+    --accent1: #38b6ff;
+    --accent2: #0e77c4;
+    --danger: #e04a4a;
+    --text: #ffffff;
+    --muted: rgba(255,255,255,0.85);
+    --radius: 12px;
+    --input-bg: rgba(255,255,255,0.92);
+    --input-bg-dark: rgba(255,255,255,0.06);
+    --input-text-color: #222;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    color: var(--text);
+    background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 0;
+}
+
+.main-full {
+    min-height: 100vh;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+@media (max-width: 600px) {
+    .main-full { padding: 16px; }
+}
+
+/* TOPBAR */
+.topbar {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    margin-bottom:24px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+.search input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: var(--input-bg);
+    color: #222;
+}
+.search { flex-grow: 1; max-width: 300px; }
+
+/* Dropdown */
+.user-menu-container { position: relative; z-index: 100; }
+.user-avatar-btn {
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+    box-shadow:0 6px 18px rgba(14,119,196,0.18);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    transition: transform 0.15s;
+}
+.user-avatar-btn:hover { transform: scale(1.05); }
+.user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.user-dropdown {
+    position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+    padding: 20px; display: none; flex-direction: column; gap: 15px;
+    animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+}
+.user-dropdown.show { display: flex; }
+@keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+.user-dropdown-header .user-info { flex-grow: 1; min-width: 0; }
+.user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+.user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+.user-dropdown-option:hover { background-color: #e0e0e0; }
+.logout-form { margin: 0; padding: 0; display: block; }
+.user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+.user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+.user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); display: flex; align-items: center; gap: 8px; }
+.user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+/* Tablas y Formularios */
+.card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+.table { width:100%; border-collapse:collapse; margin-top:12px; }
+.table thead th { text-align:left; padding:15px 18px; font-size:15px; color:rgba(255,255,255,0.9); }
+.table tbody td { padding:15px 18px; font-size:16px; border-top:1px solid rgba(255,255,255,0.06); }
+.small-btn { padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px; background: rgba(255,255,255,0.08); color:var(--text); transition: background .18s; display: inline-flex; align-items: center; gap: 5px; }
+.small-btn:hover{ background: rgba(255,255,255,0.15); }
+.small-btn.edit{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#032033; font-weight:600; }
+.small-btn.del{ background: rgba(224,74,74,0.95); color:white; }
+.big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; box-shadow: 0 4px 12px rgba(14,119,196,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+.big-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(14,119,196,0.4); }
+.big-btn.cancel { background: rgba(255,255,255,0.15); color: var(--text); box-shadow: none; }
+.big-btn.cancel:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+.form-control, .form-select, textarea.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-family: "Poppins", sans-serif;
+    font-size: 16px;
+    background: var(--input-bg);
+    color: var(--input-text-color);
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: box-shadow 0.15s;
+    resize: vertical;
+}
+.form-control::placeholder { color: #888; font-weight: 400; }
+.form-select { appearance: none; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: 16px; font-weight: 600; color: var(--text); }
+
+.tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+.tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; position: relative; transition: color .18s; }
+.tab-button:hover { color: var(--text); }
+.tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+.tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+.tab-content.active { display: block; }
+
+.detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.muted{ color:rgba(255,255,255,0.85); font-size:13px }
+.row{ display:flex; gap:12px; align-items:center }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.section { animation: fadeIn .28s ease forwards; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:translateY(0);} }
+
+footer.page-footer{ text-align:center; padding:18px; color:rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+    <div class="main-full">
+        <div class="topbar">
+            <h1>Gestión de Residentes y Propietarios</h1>
+
+            <div class="search">
+                <form method="get" action="{% url 'residente_listado' %}">
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Buscar por nombre..."
+                        value="{{ busqueda_actual|default:'' }}"
+                        autocomplete="off"
+                    >
+                </form>
+            </div>
+
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    <img src="{% static 'images/login.png' %}" alt="User Avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                        <div class="user-info">
+                            <div class="user-email">admin.condogest@example.com</div>
+                            <div class="user-greeting">¡Hola, Gestor!</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="user-dropdown-option">
+                        <span class="material-icons" style="font-size: 20px;">home</span> Dashboard
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                            <span class="material-icons" style="font-size: 20px;">logout</span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <section id="residentes" class="section">
+            <div class="card">
+                <h3 style="margin:0">Panel de Control</h3>
+                <p class="muted">Listado, registro y actualización de datos de residentes.</p>
+
+                <div class="tabs">
+                    <button class="tab-button {% if not residente_a_editar %}active{% endif %}" data-tab="listado">Listado General</button>
+                    <button class="tab-button" data-tab="registro">Nuevo Registro</button>
+
+                    <button class="tab-button {% if residente_a_editar %}active{% endif %}" data-tab="detalle" id="btnDetalle" {% if not residente_a_editar %}hidden{% endif %}>Detalle / Edición</button>
+                </div>
+
+                <div class="tab-content {% if not residente_a_editar %}active{% endif %}" data-tab-content="listado">
+                    <div style="overflow:auto">
+                        <table class="table" id="tblResidents">
+                            <thead><tr><th>Nombre</th><th>Tipo</th><th>Unidad</th><th>Contacto</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                                {% for residente in residentes %}
+                                <tr data-id="{{ residente.pk }}">
+                                    <td>{{ residente.nombre_completo }}</td>
+                                    <td>{{ residente.get_tipo_residente_display }}</td>
+                                    <td>{{ residente.unidad_principal }}</td>
+                                    <td>{{ residente.correo_electronico }}</td>
+                                    <td>{{ residente.get_estado_display }}</td>
+                                    <td>
+                                        <a href="{% url 'residente_editar' residente.pk %}" class="small-btn edit">Ver / Editar</a>
+                                        <form action="{% url 'residente_eliminar' residente.pk %}" method="post" style="display:inline; margin-left: 5px;" onsubmit="return confirm('¿Está seguro de eliminar a {{ residente.nombre_completo }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="small-btn del">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" style="text-align:center; padding: 20px;">No hay residentes registrados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-tab-content="registro">
+                    <h4 style="margin-top:0; color:var(--accent1);">Formulario de Registro Completo</h4>
+
+                    <form method="post" action="{% url 'residente_listado' %}">
+                        {% csrf_token %}
+
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 25px;">
+                            <h5 style="margin:0 0 10px 0; color:var(--muted)">Datos Personales</h5>
+                            <div class="grid-2">
+                                <!-- NOMBRE SEPARADO EN 3 INPUTS -->
+                                <div class="form-group">
+                                    <label>Nombre completo</label>
+                                    <div class="grid-2" style="gap: 10px;">
+                                        <input
+                                            type="text"
+                                            id="reg_nombre"
+                                            name="reg_nombre"
+                                            class="form-control"
+                                            placeholder="Nombre"
+                                            required
+                                        >
+                                        <input
+                                            type="text"
+                                            id="reg_apellido_p"
+                                            name="reg_apellido_p"
+                                            class="form-control"
+                                            placeholder="Apellido paterno"
+                                            required
+                                        >
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <input
+                                            type="text"
+                                            id="reg_apellido_m"
+                                            name="reg_apellido_m"
+                                            class="form-control"
+                                            placeholder="Apellido materno"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reg_id">DNI / Pasaporte</label>
+                                    <input
+                                        type="text"
+                                        id="reg_id"
+                                        name="reg_id"
+                                        class="form-control"
+                                        placeholder="Ej. 12345678A"
+                                        required
+                                        maxlength="9"
+                                        pattern="\d{8}[A-Za-z]"
+                                    >
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="reg_phone">Teléfono</label>
+                                    <input
+                                        type="tel"
+                                        id="reg_phone"
+                                        name="reg_phone"
+                                        class="form-control"
+                                        placeholder="Ej. 5512345678"
+                                        maxlength="10"
+                                        required
+                                        inputmode="numeric"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg_email">Correo Electrónico</label>
+                                    <input
+                                        type="email"
+                                        id="reg_email"
+                                        name="reg_email"
+                                        class="form-control"
+                                        placeholder="Ej. ana.soto@ejemplo.com"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="reg_birth">Fecha de Nacimiento</label>
+                                    <input
+                                        type="date"
+                                        id="reg_birth"
+                                        name="reg_birth"
+                                        class="form-control"
+                                        max="2025-12-31"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg_type">Tipo de Residente</label>
+                                    <select id="reg_type" name="reg_type" class="form-select" required>
+                                        {% for op in TIPO_RESIDENTE_CHOICES %}
+                                            <option value="{{ op.0 }}">{{ op.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 25px;">
+                            <h5 style="margin:0 0 10px 0; color:var(--muted)">Unidad Asignada</h5>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="reg_unit">Unidad Principal</label>
+                                    <input
+                                        type="text"
+                                        id="reg_unit"
+                                        name="reg_unit"
+                                        class="form-control"
+                                        placeholder="Ej. C-501"
+                                        required
+                                        pattern="[A-Za-z]-\d{3}"
+                                        title="Torres Letra-3 dígitos (ej. C-501)"
+                                        oninput="this.value = this.value.toUpperCase().replace(/[^Torres A-Z0-9\-]/g, '');"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg_status">Estado</label>
+                                    <select id="reg_status" name="reg_status" class="form-select" required>
+                                        {% for op in ESTADO_CHOICES %}
+                                            <option value="{{ op.0 }}">{{ op.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_parking">Espacios de Estacionamiento</label>
+                                <input
+                                    type="text"
+                                    id="reg_parking"
+                                    name="reg_parking"
+                                    class="form-control"
+                                    placeholder="Ej. A-312, B-101"
+                                    pattern="[A-Za-z]-\d{3}(,\s*[A-Za-z]-\d{3})*"
+                                    title="Formato: Letra-3 números, por ejemplo A-312 o A-312, B-101"
+                                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9,\-\s]/g, '');"
+                                >
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                            <button type="button" class="big-btn cancel" onclick="switchTab('listado')">Cancelar</button>
+                            <button type="submit" class="big-btn">Guardar Registro Completo</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-content {% if residente_a_editar %}active{% endif %}" data-tab-content="detalle">
+                    {% if residente_a_editar %}
+                    <div class="detail-header">
+                        <h4 style="margin:0; color:var(--accent1);">
+                            Detalle y Edición: {{ residente_a_editar.nombre_completo }} ({{ residente_a_editar.get_tipo_residente_display }})
+                        </h4>
+                        <a href="{% url 'residente_listado' %}" class="big-btn cancel">← Volver al Listado</a>
+                    </div>
+
+                    <form method="post" action="{% url 'residente_editar' residente_a_editar.pk %}">
+                        {% csrf_token %}
+
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 25px;">
+                            <h5 style="margin:0 0 10px 0; color:var(--muted)">Datos Personales</h5>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="edit_name">Nombre Completo</label>
+                                    <input
+                                        type="text"
+                                        id="edit_name"
+                                        name="edit_name"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.nombre_completo }}"
+                                        required
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_id">DNI / Pasaporte</label>
+                                    <input
+                                        type="text"
+                                        id="edit_id"
+                                        name="edit_id"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.dni }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="edit_phone">Teléfono</label>
+                                    <input
+                                        type="tel"
+                                        id="edit_phone"
+                                        name="edit_phone"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.telefono|default:'' }}"
+                                        maxlength="10"
+                                        required
+                                        inputmode="numeric"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_email">Correo Electrónico</label>
+                                    <input
+                                        type="email"
+                                        id="edit_email"
+                                        name="edit_email"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.correo_electronico }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="edit_birth">Fecha de Nacimiento</label>
+                                    <input
+                                        type="date"
+                                        id="edit_birth"
+                                        name="edit_birth"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.fecha_nacimiento|date:'Y-m-d' }}"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_type">Tipo de Residente</label>
+                                    <select id="edit_type" name="edit_type" class="form-select" required>
+                                        {% for op in TIPO_RESIDENTE_CHOICES %}
+                                            <option value="{{ op.0 }}" {% if residente_a_editar.tipo_residente == op.0 %}selected{% endif %}>
+                                                {{ op.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 25px;">
+                            <h5 style="margin:0 0 10px 0; color:var(--muted)">Unidad Asignada</h5>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="edit_unit">Unidad Principal</label>
+                                    <input
+                                        type="text"
+                                        id="edit_unit"
+                                        name="edit_unit"
+                                        class="form-control"
+                                        value="{{ residente_a_editar.unidad_principal }}"
+                                        required
+                                        pattern="[A-Za-z]-\d{3}"
+                                        title="Torres Letra-3 dígitos (ej. C-501)"
+                                        oninput="this.value = this.value.toUpperCase().replace(/[^Torres A-Z0-9\-]/g, '');"
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_status">Estado</label>
+                                    <select id="edit_status" name="edit_status" class="form-select" required>
+                                        {% for op in ESTADO_CHOICES %}
+                                            <option value="{{ op.0 }}" {% if residente_a_editar.estado == op.0 %}selected{% endif %}>
+                                                {{ op.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_parking">Espacios de Estacionamiento</label>
+                                <input
+                                    type="text"
+                                    id="edit_parking"
+                                    name="edit_parking"
+                                    class="form-control"
+                                    value="{{ residente_a_editar.espacios_estacionamiento|default:'' }}"
+                                    pattern="[A-Za-z]-\d{3}(,\s*[A-Za-z]-\d{3})*"
+                                    title="Formato: Letra-3 números, por ejemplo A-312 o A-312, B-101"
+                                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9,\-\s]/g, '');"
+                                >
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px; text-align: right;">
+                            <button type="submit" class="big-btn">Guardar Actualización Total</button>
+                        </div>
+                    </form>
+                    {% else %}
+                        <p style="text-align:center; padding: 20px;">Seleccione un residente del listado para ver su detalle y editar.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="page-footer">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        // Define la URL base de listado como una variable de JS
+        const RESIDENTE_LISTADO_URL = "{% url 'residente_listado' %}";
+
+        function switchTab(tabId) {
+            // Desactiva la pestaña anterior
+            document.querySelector('.tabs .tab-button.active')?.classList.remove('active');
+            document.querySelector('.tab-content.active')?.classList.remove('active');
+
+            // Activa la nueva pestaña y contenido
+            document.querySelector(`.tabs [data-tab="${tabId}"]`).classList.add('active');
+            document.querySelector(`[data-tab-content="${tabId}"]`).classList.add('active');
+
+            // Muestra/Oculta el botón de detalle. Usa 'inline-flex' por consistencia de estilo.
+            const btnDetalle = document.getElementById('btnDetalle');
+            btnDetalle.style.display = (tabId === 'detalle') ? 'inline-flex' : 'none';
+
+            // Si salimos de 'detalle' y la URL tiene un PK, redirigimos a la URL base
+            if (tabId !== 'detalle' && window.location.pathname.includes('/editar/')) {
+                window.location.href = RESIDENTE_LISTADO_URL;
+            }
+        }
+
+        // Listener para las pestañas
+        document.querySelectorAll('.tabs .tab-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.dataset.tab);
+            });
+        });
+
+        // Lógica del Dropdown del Avatar
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        userAvatarBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', (event) => {
+            if (!userDropdown.contains(event.target) && !userAvatarBtn.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // Inicializar: Activa la pestaña correcta al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const isEditing = "{% if residente_a_editar %}true{% else %}false{% endif %}";
+
+            if (isEditing === "true") {
+                switchTab('detalle');
+            } else {
+                switchTab('listado');
+            }
+        });
+    </script>
+</body>
+</html>

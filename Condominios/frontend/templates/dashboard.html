@@ -1,0 +1,1250 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CondoGest — Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+      --glass: rgba(255,255,255,0.12);
+      --glass-strong: rgba(255,255,255,0.18);
+      --accent1: #38b6ff;
+      --accent2: #0e77c4;
+      --danger: #e04a4a;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.85);
+      --radius: 12px;
+      --success: #22c55e;
+      --warning: #facc15;
+    }
+
+/* Badges de Acción con colores específicos */
+.badge-log {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+.badge-CREACION { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+.badge-EDICION { background: rgba(33, 150, 243, 0.2); color: #2196F3; border: 1px solid #2196F3; }
+.badge-ELIMINACION { background: rgba(244, 67, 54, 0.2); color: #F44336; border: 1px solid #F44336; }
+.badge-ACCESO { background: rgba(255, 193, 7, 0.2); color: #FFC107; border: 1px solid #FFC107; }
+.badge-LOGIN { background: rgba(156, 39, 176, 0.2); color: #E040FB; border: 1px solid #E040FB; }
+
+/* Estilo para el avatar pequeño en la tabla */
+.log-avatar-small {
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; color: var(--accent1);
+    font-size: 11px; margin-right: 10px;
+}
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Poppins",sans-serif;
+      color:var(--text);
+      background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap:24px;
+      padding:24px;
+      align-items:start;
+    }
+
+    .text-success-bold { color: var(--success); font-weight: 600; }
+    .text-warning-bold { color: var(--warning); font-weight: 600; }
+
+    @media (max-width: 900px){
+      .app { grid-template-columns: 1fr; padding:16px; }
+    }
+
+    .sidebar {
+      position:sticky;
+      top:24px;
+      height: calc(100vh - 48px);
+      padding:18px;
+      border-radius:var(--radius);
+      background:var(--glass-strong);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      display:flex;
+      flex-direction:column;
+      transition: transform .25s ease;
+    }
+
+    .brand {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+    .brand img{ width:44px; border-radius:10px; }
+    .brand h3 { margin:0; font-size:18px; letter-spacing:0.2px; }
+
+    .nav {
+      margin-top:6px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+      overflow:auto;
+      padding-right:6px;
+    }
+    .nav button{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      text-align:left;
+      transition: background .18s, transform .12s;
+      font-size:14px;
+    }
+    .nav button:hover{ background: rgba(255,255,255,0.04); transform: translateX(4px); color:var(--text) }
+    .nav button.active{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#032033; font-weight:600; }
+
+    .user-menu-container { position: relative; z-index: 100; }
+    .user-avatar-btn {
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+      box-shadow:0 6px 18px rgba(14,119,196,0.18);
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      font-size: 18px;
+      transition: transform 0.15s;
+    }
+    .user-avatar-btn:hover { transform: scale(1.05); }
+    .user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .user-dropdown {
+      position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+      padding: 20px; display: none; flex-direction: column; gap: 15px;
+      animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+    }
+    .user-dropdown.show { display: flex; }
+    @keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+    .user-dropdown-header .user-info { flex-grow: 1; min-width: 0; }
+    .user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+    .user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+    .user-dropdown-option:hover { background-color: #e0e0e0; }
+    .logout-form { margin: 0; padding: 0; display: block; }
+    .user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+    .user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+    .user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); display: flex; align-items: center; gap: 8px; }
+    .user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+    .sidebar .footer {
+      margin-top:12px;
+      font-size:13px;
+      color:rgba(255,255,255,0.78);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .main {
+      min-height: calc(100vh - 48px);
+    }
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .search {
+      flex:1;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .search input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:none;
+      outline:none;
+      background: rgba(255,255,255,0.92);
+      color:#222;
+    }
+    .top-actions { display:flex; gap:8px; align-items:center; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:18px;
+    }
+    @media (max-width:1100px){ .grid{ grid-template-columns: repeat(2,1fr);} }
+    @media (max-width:700px){ .grid{ grid-template-columns: 1fr;} }
+
+    .card {
+      padding:18px;
+      border-radius:14px;
+      background:var(--glass);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+      transition: transform .18s;
+    }
+    .card:hover{ transform: translateY(-6px); }
+
+    .kpi { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .kpi .value{ font-size:22px; font-weight:700; }
+    .kpi .label{ font-size:13px; color:rgba(255,255,255,0.9); }
+
+    .table {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px;
+    }
+    .table thead th { text-align:left; padding:10px 12px; font-size:13px; color:rgba(255,255,255,0.9) }
+    .table tbody td { padding:10px 12px; font-size:14px; border-top:1px solid rgba(255,255,255,0.06) }
+
+    .small-btn {
+      padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px;
+      background: rgba(255,255,255,0.08); color:var(--text);
+    }
+    .small-btn.edit{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#032033; }
+    .small-btn.del{ background: rgba(224,74,74,0.95); color:white; }
+
+    .section { display:none; animation: fadeIn .28s ease forwards; }
+    .section.active { display:block; }
+
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:translateY(0);} }
+
+    .mobile-toggle {
+      display:none;
+      background:transparent;border:none;color:var(--text);font-size:20px;cursor:pointer;
+    }
+    @media (max-width:900px){
+      .sidebar{ position:fixed; left:0; top:0; bottom:0; z-index:40; width:260px; transform: translateX(-110%); transition: transform .24s; padding-top:44px; }
+      .sidebar.open{ transform: translateX(0); }
+      .app { grid-template-columns: 1fr; }
+      .mobile-toggle{ display:inline-flex; align-items:center; gap:8px; }
+      .overlay { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:30; opacity:0; pointer-events:none; transition:opacity .2s;}
+      .overlay.show{ opacity:1; pointer-events:auto; }
+    }
+
+    footer.page-footer{ text-align:center; padding:18px; color:rgba(255,255,255,0.7) }
+
+    .muted{ color:rgba(255,255,255,0.85); font-size:13px }
+    .row{ display:flex; gap:12px; align-items:center }
+  </style>
+</head>
+<body>
+
+  <div id="overlay" class="overlay" style="display:none"></div>
+
+  <div class="app">
+
+    <aside id="sidebar" class="sidebar" aria-label="Menú lateral">
+      <div class="brand">
+        <img src="{% static 'images/login.png' %}" alt="logo">
+        <div>
+          <h3>CondoGest</h3>
+          <div class="muted">Sistema de Gestión de Condominios</div>
+        </div>
+      </div>
+
+      <nav class="nav" role="navigation">
+        <!-- Dashboard siempre visible -->
+        <button class="nav-btn active" data-section="home">Dashboard</button>
+
+        <!-- Guardias y admin: Residentes -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'guardia' %}
+          <button class="nav-btn" data-section="residentes">Residentes / Propietarios</button>
+        {% endif %}
+
+        <!-- Admin, residente/propietario y empleado: Pagos -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'residente' or rol_usuario == 'propietario' or rol_usuario == 'empleado' %}
+          <button class="nav-btn" data-section="pagos">Pagos y Cobros</button>
+        {% endif %}
+
+        <!-- Admin, residente/propietario y empleado: Tickets -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'residente' or rol_usuario == 'propietario' or rol_usuario == 'empleado' %}
+          <button class="nav-btn" data-section="tickets">Solicitudes / Tickets</button>
+        {% endif %}
+
+        <!-- Solo admin: Personal & Proveedores -->
+        {% if rol_usuario == 'admin' %}
+          <button class="nav-btn" data-section="personal">Personal & Proveedores</button>
+        {% endif %}
+
+        <!-- Admin, residente, guardia: Reuniones -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'residente' or rol_usuario == 'propietario' or rol_usuario == 'guardia' %}
+          <button class="nav-btn" data-section="reuniones">Reuniones & Comunicaciones</button>
+        {% endif %}
+
+        <!-- Admin y guardia: Control de accesos -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'guardia' %}
+          <button class="nav-btn" data-section="seguridad">Control de Accesos</button>
+        {% endif %}
+
+        <!-- Todos los roles válidos: Áreas comunes -->
+        {% if rol_usuario == 'admin' or rol_usuario == 'residente' or rol_usuario == 'propietario' or rol_usuario == 'empleado' or rol_usuario == 'guardia' %}
+          <button class="nav-btn" data-section="areas">Áreas Comunes</button>
+        {% endif %}
+
+        <!-- Solo admin: Reportes y documentación -->
+        {% if rol_usuario == 'admin' %}
+          <button class="nav-btn" data-section="reportes">Reportes & Análisis</button>
+          <button class="nav-btn" data-section="documentacion">Documentación</button>
+        {% endif %}
+
+        <!-- Usuarios (solo admin, porque solo en admin se llena este contexto) -->
+        {% if usuarios %}
+          <button class="nav-btn" data-section="usuarios">Usuarios</button>
+        {% endif %}
+
+        <!-- logs -->
+         {% if rol_usuario == 'admin' %}
+          <button class="nav-btn" data-section="logs">Logs</button>
+        {% endif %}
+      </nav>
+
+      <div class="footer">
+        <div class="muted">v1.0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.8)">
+          Usuario: {{ request.user.username|default:"Invitado" }}
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <div class="topbar">
+
+        <div class="row">
+          <button id="btnToggle" class="mobile-toggle" title="Abrir menú">☰</button>
+          <div style="font-weight:600; font-size:18px">Dashboard</div>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center; flex: 1; padding: 0 20px;">
+          <div class="search" style="max-width:100%">
+            <input id="searchInput" placeholder="Buscar en la sección actual...">
+          </div>
+        </div>
+
+        <div class="user-menu-container">
+            <button class="user-avatar-btn" id="userAvatarBtn">
+                <img src="{% static 'images/login.png' %}" alt="User Avatar">
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-dropdown-header">
+                    <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                    <div class="user-info">
+                        <div class="user-email">
+                          {{ request.user.email|default:"sin_correo@ejemplo.com" }}
+                        </div>
+                        <div class="user-greeting">
+                          ¡Hola, {{ request.user.username|default:"usuario" }}!
+                        </div>
+                    </div>
+                </div>
+                <form action="{% url 'logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+
+      </div>
+
+      <section id="home" class="section active">
+        <div class="grid">
+
+          <div class="card">
+            <div class="kpi">
+                <div>
+                    <div class="label muted">Residentes activos</div>
+                    <div class="value">{{ kpi_residentes }}</div>
+                </div>
+                <div style="font-size:28px; opacity:0.95"></div>
+            </div>
+            <div style="margin-top:10px; color:rgba(255,255,255,0.85); font-size: 13px;">
+                Total de unidades ocupadas.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kpi">
+                <div>
+                    <div class="label muted">Cuotas pendientes</div>
+                    <div class="value" style="color: var(--warning);">{{ kpi_cuotas }}</div>
+                </div>
+                <div style="font-size:28px; opacity:0.95"></div>
+            </div>
+            <div style="margin-top:10px; color:rgba(255,255,255,0.85); font-size: 13px;">
+                Recibos sin liquidar o vencidos.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kpi">
+                <div>
+                    <div class="label muted">Tickets abiertos</div>
+                    <div class="value" style="color: var(--accent1);">{{ kpi_tickets }}</div>
+                </div>
+                <div style="font-size:28px; opacity:0.95"></div>
+            </div>
+            <div style="margin-top:10px; color:rgba(255,255,255,0.85); font-size: 13px;">
+                Incidencias en proceso de atención.
+            </div>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="card" style="margin-top:6px">
+            <h4 style="margin:0 0 15px 0; color:var(--accent1);">Actividad Reciente del Condominio</h4>
+            <div style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Evento</th>
+                            <th>Detalle</th>
+                            <th>Usuario</th>
+                            <th>Unidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in actividad_reciente %}
+                        <tr>
+                            <td style="font-weight:bold; color:var(--muted);">{{ item.hora|date:"H:i" }}</td>
+
+                            <td>
+                                {% if item.tipo == 'pago' %}
+                                    <span style="color:#4CAF50; font-weight:600;"> {{ item.evento }}</span>
+                                {% else %}
+                                    <span style="color:#38b6ff; font-weight:600;"> {{ item.evento }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="muted">{{ item.detalle|truncatechars:30 }}</td>
+                            <td>{{ item.usuario }}</td>
+                            <td>{{ item.unidad }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">
+                                No hay actividad reciente registrada hoy.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="residentes" class="section">
+        <div class="card" style="margin-top: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="margin:0">Directorio de Residentes</h3>
+              <a href="{% url 'residente_listado' %}" class="small-btn edit">Gestionar Residentes</a>
+          </div>
+
+          <div style="overflow:auto">
+              <table class="table">
+                  <thead>
+                      <tr>
+                          <th>Nombre</th>
+                          <th>Tipo</th>
+                          <th>Unidad</th>
+                          <th>Estado</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for residente in residentes %}
+                      <tr>
+                          <td>{{ residente.nombre_completo }}</td>
+                          <td>{{ residente.get_tipo_residente_display }}</td>
+                          <td>{{ residente.unidad_principal }}</td>
+                          <td>{{ residente.get_estado_display }}</td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="4" style="text-align:center; padding: 20px;">
+                              No hay residentes registrados.
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="pagos" class="section">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h3 style="margin:0">Resumen de Pagos y Cobros</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Últimos movimientos registrados.</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                   <a href="{% url 'dashboard_pagos' %}" class="small-btn edit">Gestionar pagos</a>
+                </div>
+            </div>
+
+            <div style="margin-top:14px; overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Unidad / Residente</th>
+                            <th>Concepto</th>
+                            <th>Fecha Emisión</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in ultimos_pagos %}
+                        <tr>
+                            <td>
+                                <strong>{{ pago.residente.unidad_principal }}</strong><br>
+                                <span style="font-size:0.85em; color:var(--muted)">{{ pago.residente.nombre_completo }}</span>
+                            </td>
+                            <td>{{ pago.descripcion }}</td>
+                            <td>{{ pago.fecha_emision|date:"M Y" }}</td>
+
+                            <td style="font-weight:bold;">
+                                ${{ pago.monto_total|floatformat:2|intcomma }}
+                            </td>
+
+                            <td>
+                                {% if pago.estado == 'PAGADO' %}
+                                    <span style="background:#4CAF50; color:white; padding:4px 8px; border-radius:6px; font-size:0.8em;">Pagado</span>
+                                {% elif pago.estado == 'PENDIENTE' %}
+                                    <span style="background:#FFC107; color:#333; padding:4px 8px; border-radius:6px; font-size:0.8em;">Pendiente</span>
+                                {% elif pago.estado == 'VENCIDO' %}
+                                    <span style="background:#e04a4a; color:white; padding:4px 8px; border-radius:6px; font-size:0.8em;">Vencido</span>
+                                {% else %}
+                                    <span style="background:#17a2b8; color:white; padding:4px 8px; border-radius:6px; font-size:0.8em;">{{ pago.estado }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px;">
+                                No hay movimientos registrados aún.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="tickets" class="section">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                <div>
+                    <h3 style="margin:0">Gestión de Solicitudes y Tickets</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Crear, asignar y cerrar tickets de mantenimiento.</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                  <a href="{% url 'dashboard_tickets' %}" class="small-btn edit">Gestionar Solicitudes </a>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'crear_ticket' %}">
+                {% csrf_token %}
+                <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; align-items: center;">
+
+                    <select name="residente_id" style="padding:10px; border-radius:8px; border:none; background:rgba(255,255,255,0.1); color:var(--text); max-width: 150px;" required>
+                        <option value="">Unidad...</option>
+                        {% for res in residentes %}
+                            <option value="{{ res.id }}">{{ res.unidad_principal }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input name="asunto" placeholder="Asunto (Ej. Fuga en baño)" style="padding:10px; border-radius:8px; border:none; min-width:200px; flex-grow:1; background:rgba(255,255,255,0.9); color:#333;" required>
+
+                    <select name="prioridad" style="padding:10px; border-radius:8px; border:none; background:rgba(255,255,255,0.1); color:var(--text);">
+                        <option value="MEDIA">Normal</option>
+                        <option value="ALTA">Alta</option>
+                        <option value="EMERGENCIA">Urgente</option>
+                    </select>
+
+                    <button type="submit" class="small-btn edit" style="padding: 10px 15px;">Crear Ticket</button>
+                </div>
+            </form>
+
+            <div style="margin-top:15px; overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Asunto</th>
+                            <th>Unidad</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in ultimos_tickets %}
+                        <tr>
+                            <td style="color:var(--accent1); font-weight:bold;">#{{ ticket.id }}</td>
+                            <td>{{ ticket.asunto }}</td>
+                            <td>{{ ticket.residente.unidad_principal }}</td>
+                            <td>
+                                {% if ticket.estado == 'ABIERTO' %}
+                                    <span style="color:#ff6b6b; font-weight:600;">Abierto</span>
+                                {% elif ticket.estado == 'CERRADO' %}
+                                    <span style="color:#4CAF50; font-weight:600;">Cerrado</span>
+                                {% else %}
+                                    <span style="color:#FFC107; font-weight:600;">En Proceso</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard_tickets' %}?ticket_id={{ ticket.id }}" class="small-btn">Gestionar</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:15px;">No hay tickets recientes.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="personal" class="section">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0">Administración de Personal y Proveedores</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <a href="{% url 'dashboard_personal' %}" class="small-btn edit">Gestionar Personal </a>
+                </div>
+            </div>
+            <p class="muted">Registra empleados, proveedores y asigna tareas.</p>
+
+            <form method="POST" action="{% url 'crear_personal' %}" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+                {% csrf_token %}
+                <input type="hidden" name="tipo_entidad" value="empleado">
+                <input type="text" name="nombre" placeholder="Nombre / Empresa" style="padding:10px; border-radius:8px; border:none; background: rgba(255,255,255,0.9); color: #333; flex: 1;" required>
+                <input type="text" name="rol" placeholder="Servicio / Rol" style="padding:10px; border-radius:8px; border:none; background: rgba(255,255,255,0.9); color: #333; flex: 1;" required>
+                <input type="text" name="contacto" placeholder="Teléfono" style="padding:10px; border-radius:8px; border:none; background: rgba(255,255,255,0.9); color: #333; width: 120px;">
+                <button type="submit" class="small-btn edit">Agregar Rápido</button>
+            </form>
+
+            <div style="margin-top:12px; overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Rol / Servicio</th>
+                            <th>Contacto</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in empleados %}
+                        <tr>
+                            <td>{{ emp.nombre_completo }}</td>
+                            <td><span style="color:var(--accent1); font-size:0.9em;">(Emp)</span> {{ emp.puesto }}</td>
+                            <td>{{ emp.telefono }}</td>
+                            <td>
+                                <a href="{% url 'dashboard_personal' %}?tipo=empleado&id={{ emp.id }}" class="small-btn edit">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% for prov in proveedores %}
+                        <tr>
+                            <td>{{ prov.nombre_empresa }}</td>
+                            <td><span style="color:var(--warning); font-size:0.9em;">(Prov)</span> {{ prov.tipo_servicio }}</td>
+                            <td>{{ prov.telefono_contacto }}</td>
+                            <td>
+                                <a href="{% url 'dashboard_personal' %}?tipo=proveedor&id={{ prov.id }}" class="small-btn edit">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not empleados and not proveedores %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:var(--muted);">No hay registros recientes.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="reuniones" class="section">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div>
+                    <h3 style="margin:0; color: #38b6ff;">Próximas Asambleas</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Panel de control de eventos.</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                   <a href="{% url 'dashboard_reuniones' %}" class="small-btn edit">Gestionar Asambleas </a>
+                </div>
+
+            </div>
+
+            <div style="display: grid; gap: 10px;">
+                {% for reunion in ultimas_reuniones %}
+                <div style="background:rgba(255,255,255,0.08); padding:15px; border-radius:12px; display:flex; align-items:center; gap:15px; border:1px solid rgba(255,255,255,0.1);">
+
+                    <div style="background:rgba(255,255,255,0.18); padding:8px 12px; border-radius:8px; text-align:center; min-width:65px;">
+                        <span style="display:block; font-size:11px; color:#38b6ff; text-transform:uppercase; font-weight:700;">{{ reunion.fecha_reunion|date:"M" }}</span>
+                        <span style="display:block; font-size:22px; font-weight:700; line-height: 1;">{{ reunion.fecha_reunion|date:"d" }}</span>
+                    </div>
+
+                    <div style="flex-grow:1;">
+                        <strong style="font-size:16px; display:block; margin-bottom:4px;">{{ reunion.titulo }}</strong>
+                        <div class="muted" style="font-size:13px;">
+                            {{ reunion.fecha_reunion|date:"H:i" }} hrs •
+                            <span style="font-weight:600; color:#FFC107;">{{ reunion.estado }}</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'dashboard_reuniones' %}?tab=detalle&id={{ reunion.id }}" class="small-btn" style="text-decoration:none; background:rgba(255,255,255,0.1); padding:8px 15px; border-radius:6px;">
+                        Ver
+                    </a>
+                </div>
+                {% empty %}
+                <div style="text-align:center; padding:30px; background:rgba(255,255,255,0.05); border-radius:10px;">
+                    <p>No se encontraron reuniones en la base de datos.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+      </section>
+
+      <section id="seguridad" class="section" style="margin-top: 20px;">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin:0; color: var(--accent1);">Control de Accesos</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Monitor de visitas activas en el recinto.</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                   <a href="{% url 'dashboard_accesos' %}" class="small-btn edit">Controlar accesos </a>
+                </div>
+
+            </div>
+
+            <form method="POST" action="{% url 'registrar_entrada' %}" style="margin-bottom: 20px;">
+                {% csrf_token %}
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+                    <input type="text" name="nombre_visitante" placeholder="Nombre Visitante" required
+                           style="flex: 2; min-width: 200px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit;">
+
+                    <input type="text" name="placa_vehiculo" placeholder="Placa (Opcional)"
+                           style="flex: 1; min-width: 120px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit;">
+
+                    <select name="residente_id" required
+                            style="flex: 2; min-width: 200px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit; cursor: pointer;">
+                        <option value="">Destino / Unidad...</option>
+                        {% for res in residentes %}
+                            <option value="{{ res.id }}">{{ res.unidad_principal }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input type="hidden" name="tipo_visitante" value="VISITA_CASUAL">
+
+                    <button type="submit"
+                            style="flex: 1; min-width: 140px; background: linear-gradient(90deg, var(--accent1), var(--accent2)); color: #032033; border: none; padding: 12px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">
+                        Registrar
+                    </button>
+                </div>
+            </form>
+
+            <div style="overflow-x:auto;">
+                <table class="table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 10px; color: var(--accent1);">Hora</th>
+                            <th style="padding: 10px;">Visitante</th>
+                            <th style="padding: 10px;">Destino</th>
+                            <th style="padding: 10px;">Tipo</th>
+                            <th style="padding: 10px; text-align: right;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acceso in accesos_recientes %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 12px 10px; font-weight: bold;">{{ acceso.fecha_entrada|date:"H:i" }}</td>
+                            <td style="padding: 12px 10px;">{{ acceso.nombre_visitante }}</td>
+                            <td style="padding: 12px 10px;">
+                                {% if acceso.residente %}
+                                    {{ acceso.residente.unidad_principal }}
+                                {% else %}
+                                    <span class="muted">Admin/Servicio</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 12px 10px;">
+                                <span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 11px;">{{ acceso.tipo_visitante }}</span>
+                            </td>
+                            <td style="padding: 12px 10px; text-align: right;">
+                                <a href="{% url 'registrar_salida' pk=acceso.id %}" onclick="return confirm('¿Registrar salida?')"
+                                   style="background: var(--danger); color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                    Salida
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding: 20px; color: var(--muted);">
+                                No hay visitas activas en este momento.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="areas" class="section" style="margin-top: 20px;">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin:0; color: var(--accent1);">Áreas Comunes</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Reservas próximas y disponibilidad.</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                   <a href="{% url 'dashboard_areas' %}" class="small-btn edit">Registro de áreas </a>
+                </div>
+            </div>
+
+            <form action="{% url 'dashboard_areas' %}" method="get" style="margin-bottom: 20px;">
+                <input type="hidden" name="tab" value="crear">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+                    <select name="area_preseleccionada"
+                            style="flex: 2; min-width: 200px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit; cursor: pointer;">
+                        <option value="">Seleccionar Área...</option>
+                        {% for area in areas_comunes %}
+                            <option value="{{ area.id }}">{{ area.nombre }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input type="date"
+                           style="flex: 1; min-width: 150px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit;">
+
+                    <button type="submit"
+                            style="flex: 1; min-width: 120px; background: linear-gradient(90deg, var(--accent1), var(--accent2)); color: #032033; border: none; padding: 12px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">
+                        Ir a Reservar
+                    </button>
+                </div>
+            </form>
+
+            <div style="overflow-x:auto;">
+                <table class="table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 10px; color: var(--accent1);">Área</th>
+                            <th style="padding: 10px;">Fecha</th>
+                            <th style="padding: 10px;">Solicitante</th>
+                            <th style="padding: 10px;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reserva in proximas_reservas %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 12px 10px; font-weight:bold;">{{ reserva.area.nombre }}</td>
+                            <td style="padding: 12px 10px;">
+                                {{ reserva.fecha_reserva|date:"d M" }} <span class="muted" style="font-size:11px;">({{ reserva.hora_inicio|time:"H:i" }})</span>
+                            </td>
+                            <td style="padding: 12px 10px;">{{ reserva.residente.unidad_principal }}</td>
+                            <td style="padding: 12px 10px;">
+                                {% if reserva.estado == 'APROBADA' %}
+                                    <span style="background: var(--success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight:600;">Confirmada</span>
+                                {% else %}
+                                    <span style="background: var(--warning); color: #333; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight:600;">Pendiente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding: 20px; color: var(--muted);">
+                                No hay reservas próximas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      <section id="reportes" class="section" style="margin-top: 20px;">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin:0; color: var(--accent1);">Reportes y Análisis</h3>
+                    <p class="muted" style="margin:5px 0 0 0;">Exportación de datos y métricas clave.</p>
+                </div>
+                <div style="display: flex; justify-content: space_between; align-items: center; margin-bottom: 15px;">
+                   <a href="{% url 'dashboard_reportes' %}" class="small-btn edit">Gráficos completos </a>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'exportar_csv' %}" style="margin-bottom: 20px;">
+                {% csrf_token %}
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+                    <select name="tipo_reporte"
+                            style="flex: 2; min-width: 200px; background: #f0f2f5; border: none; padding: 12px 15px; border-radius: 8px; outline: none; color: #333; font-family: inherit; cursor: pointer;">
+                        <option value="finanzas">Reporte Financiero</option>
+                        <option value="residentes">Lista de Residentes</option>
+                        <option value="tickets">Historial de Mantenimiento</option>
+                    </select>
+
+                    <button type="submit"
+                            style="flex: 1; min-width: 150px; background: linear-gradient(90deg, var(--accent1), var(--accent2)); color: #032033; border: none; padding: 12px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        Descargar CSV
+                    </button>
+                </div>
+            </form>
+
+            <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <span class="muted" style="font-size: 13px; display: block; margin-bottom: 5px;">Ingresos Totales Acumulados</span>
+                    <span style="font-size: 28px; font-weight: 700; color: var(--success); letter-spacing: -0.5px;">
+                        ${{ total_ingresos|floatformat:2|intcomma }}
+                    </span>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      <section id="documentacion" class="section">
+        <div class="card">
+            <h3>Documentación y Archivo</h3>
+            <p class="muted">Sube y organiza actas, contratos y reglamentos.</p>
+
+            <form method="POST" enctype="multipart/form-data" style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap">
+                {% csrf_token %}
+                <input type="file" name="archivo_pdf" accept="application/pdf" style="padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:#fff">
+                <button type="submit" class="small-btn">Subir</button>
+            </form>
+
+            {% if upload_error %}
+            <p class="muted" style="margin-top:6px;color:#fecaca;">{{ upload_error }}</p>
+            {% endif %}
+
+            <div style="margin-top:12px">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documentos %}
+                        <tr>
+                            <td>{{ doc.nombre }}</td>
+                            <td>{{ doc.tipo|default:"Documento" }}</td>
+                            <td>{{ doc.fecha|date:"Y-m-d" }}</td>
+                            <td style="display: flex; gap: 5px;">
+                                <a class="small-btn" href="{{ doc.archivo.url }}" download>Descargar</a>
+
+                                <form method="POST" action="{% url 'eliminar_documento' doc.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este documento?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="small-btn" style="background-color: #ef4444; border: 1px solid #dc2626;">
+                                        Borrar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="color:rgba(226,232,240,0.8);text-align:center">No hay documentos cargados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </section>
+
+      {% if usuarios %}
+      <section id="usuarios" class="section">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div>
+              <h3 style="margin:0;">Usuarios del sistema</h3>
+              <p class="muted" style="margin:5px 0 0 0;">Listado de cuentas con acceso y acciones rápidas.</p>
+            </div>
+            <a href="{% url 'dashboard_usuarios' %}" class="small-btn edit">
+              Gestión Avanzada
+            </a>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th style="text-align:right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in usuarios %}
+                <tr>
+                  <td>{{ u.username }}</td>
+                  <td class="muted">{{ u.email|default:"—" }}</td>
+                  <td>
+                    {% if u.is_superuser %}
+                      Administrador
+                    {% elif u.is_staff %}
+                      Staff
+                    {% else %}
+                      Residente
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if u.is_active %}
+                      <span style="background:rgba(52,211,153,0.18);color:#6ee7b7;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;">
+                        Activo
+                      </span>
+                    {% else %}
+                      <span style="background:rgba(248,113,113,0.18);color:#fecaca;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;">
+                        Inactivo
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="text-align:right;">
+                    <a href="{% url 'dashboard_usuarios' %}?user_id={{ u.id }}"
+                       class="small-btn edit"
+                       style="margin-right:6px;">
+                      Editar
+                    </a>
+
+                    <form method="POST"
+                          action="{% url 'eliminar_usuario' u.id %}"
+                          style="display:inline;"
+                          onsubmit="return confirm('¿Seguro que deseas eliminar al usuario {{ u.username }}? Esta acción no se puede deshacer.');">
+                      {% csrf_token %}
+                      <button type="submit" class="small-btn del">
+                        Eliminar
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">
+                    No hay usuarios registrados todavía.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+<section id="logs" class="section">
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin:0; color: var(--accent1);">Auditoría del Sistema</h3>
+                <p class="muted" style="margin:5px 0 0 0;">Historial de movimientos y seguridad.</p>
+            </div>
+
+            <form method="get" action="{% url 'dashboard' %}" style="display:flex; gap:8px;">
+                <input type="hidden" name="section" value="logs">
+            </form>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha / Hora</th>
+                        <th>Usuario</th>
+                        <th>Módulo</th>
+                        <th>Acción</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="white-space:nowrap; width:140px;">
+                            <div style="font-weight:600; font-size:14px;">{{ log.fecha|date:"d M Y" }}</div>
+                            <div class="muted" style="font-size:12px;">{{ log.fecha|time:"H:i:s" }}</div>
+                        </td>
+
+                        <td>
+                            <div style="display:flex; align-items:center;">
+                                {% if log.usuario %}
+                                    <div class="log-avatar-small">
+                                        {{ log.usuario.username|slice:":2"|upper }}
+                                    </div>
+                                    <span>{{ log.usuario.username }}</span>
+                                {% else %}
+                                    <span class="muted">Sistema</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td>{{ log.modulo }}</td>
+
+                        <td>
+                            <span class="badge-log badge-{{ log.accion }}">
+                                {{ log.get_accion_display|default:log.accion }}
+                            </span>
+                        </td>
+
+                        <td style="color:rgba(255,255,255,0.85); font-size:13px; max-width: 300px;">
+                            {{ log.descripcion|truncatechars:80 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
+                            No hay registros de actividad recientes.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if logs.has_other_pages %}
+        <div style="margin-top:15px; display:flex; justify-content:center; gap:10px;">
+            {% if logs.has_previous %}
+                <a href="?section=logs&page={{ logs.previous_page_number }}" class="small-btn">Anterior</a>
+            {% endif %}
+            <span class="muted" style="align-self:center; font-size:12px;">Página {{ logs.number }}</span>
+            {% if logs.has_next %}
+                <a href="?section=logs&page={{ logs.next_page_number }}" class="small-btn">Siguiente</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+      <footer class="page-footer">© CondoGest</footer>
+    </main>
+  </div>
+
+  <script>
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.section');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const btnToggle = document.getElementById('btnToggle');
+
+    // Detectar si venimos de una recarga con parámetro 'section=logs'
+const urlParams = new URLSearchParams(window.location.search);
+const currentSection = urlParams.get('section');
+
+if(currentSection){
+    // Quitar clase active de todos
+    navBtns.forEach(btn => btn.classList.remove('active'));
+    sections.forEach(sec => sec.classList.remove('active'));
+
+    // Activar el botón y sección correctos
+    const targetBtn = document.querySelector(`.nav-btn[data-section="${currentSection}"]`);
+    const targetSec = document.getElementById(currentSection);
+
+    if(targetBtn && targetSec){
+        targetBtn.classList.add('active');
+        targetSec.classList.add('active');
+    }
+}
+
+
+    navBtns.forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelector('.nav .active')?.classList.remove('active');
+        b.classList.add('active');
+
+        const sectionId = b.dataset.section;
+        sections.forEach(s=> s.classList.toggle('active', s.id===sectionId));
+
+        const searchInput = document.getElementById('searchInput');
+        if(searchInput) {
+            searchInput.value = '';
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+        }
+
+        if(window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+      });
+    });
+
+    btnToggle.addEventListener('click', ()=>{
+      sidebar.classList.add('open'); overlay.classList.add('show'); overlay.style.display='block';
+      setTimeout(()=>{ overlay.style.opacity=1; },10);
+    });
+    overlay.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('show'); overlay.style.display='none'; });
+
+    document.getElementById('searchInput').addEventListener('input', (e)=>{
+      const term = e.target.value.toLowerCase();
+      const activeSection = document.querySelector('.section.active');
+
+      if(activeSection) {
+          const rows = activeSection.querySelectorAll('table tbody tr');
+
+          rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+          });
+      }
+    });
+
+    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userAvatarBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        userDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!userDropdown.contains(event.target) && !userAvatarBtn.contains(event.target)) {
+            userDropdown.classList.remove('show');
+        }
+    });
+  </script>
+</body>
+</html>

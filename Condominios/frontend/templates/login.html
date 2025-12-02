@@ -1,0 +1,253 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - CondoGest</title>
+
+    <!-- Fuente Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            overflow: hidden;
+        }
+
+        /* Fondo con animación de zoom lento */
+        .background {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974')
+            center/cover no-repeat;
+            animation: zoom 18s infinite alternate ease-in-out;
+            filter: brightness(0.65);
+        }
+
+        @keyframes zoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* Contenedor principal */
+        .container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            z-index: 2;
+        }
+
+        /* Tarjeta con glass + animación */
+        .login-card {
+            width: 380px;
+            max-width: 95%;
+            padding: 40px 35px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+            text-align: center;
+            color: white;
+            animation: fadeUp 1.4s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            margin-bottom: 10px;
+            transform: translateY(-5px);
+        }
+
+        .logo img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        h2 {
+            margin-top: 10px;
+            font-size: 30px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-top: -10px;
+            margin-bottom: 25px;
+            font-size: 15px;
+            opacity: 0.92;
+        }
+
+        .input-group {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 18px;
+            animation: fadeUp 1.6s ease;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 13px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.7);
+            outline: none;
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #f9fbff;
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+            transition: .2s;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(226,232,240,0.8);
+        }
+
+        .input-group input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px rgba(56,189,248,0.7);
+            transform: translateY(-1px);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #38b6ff, #0e77c4);
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            transition: .3s;
+            animation: fadeUp 1.8s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(56,182,255,0.45);
+        }
+
+        .links {
+            margin-top: 15px;
+            animation: fadeUp 2s ease;
+        }
+
+        .links a {
+            color: #cfe9ff;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        /* NUEVO: mensaje de error login */
+        .error-message {
+            margin-bottom: 12px;
+            padding: 9px 11px;
+            border-radius: 10px;
+            background-color: rgba(248, 113, 113, 0.14);
+            border: 1px solid rgba(248, 113, 113, 0.7);
+            color: #fee2e2;
+            font-size: 13px;
+        }
+
+        /* NUEVO: recordar sesión */
+        .remember-row {
+            margin-bottom: 8px;
+            text-align: left;
+            font-size: 13px;
+            color: #e5f0ff;
+        }
+
+        .remember-row input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #38bdf8;
+            margin-right: 4px;
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 25px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .container {
+                padding: 0 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="login-card">
+
+            <div class="logo">
+                <img src="{% static 'images/login.png' %}" alt="Logo">
+            </div>
+
+            <h2>CondoGest</h2>
+            <p>Sistema de Gestión de Condominios</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <div class="input-group">
+                    <label>Usuario</label>
+                    <input type="text" name="username" placeholder="Ingrese su usuario" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="password" placeholder="Ingrese su contraseña" required>
+                </div>
+
+                <button type="submit" class="btn-login">Iniciar sesión</button>
+            </form>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Reuniones y Comunicaciones</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* ESTILOS GLOBALES (Mismo tema) */
+        :root{
+            --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+            --glass: rgba(255,255,255,0.12);
+            --glass-strong: rgba(255,255,255,0.18);
+            --accent1: #38b6ff;
+            --accent2: #0e77c4;
+            --danger: #e04a4a;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.85);
+            --radius: 12px;
+            --input-bg: rgba(255,255,255,0.92);
+            --input-text-color: #222;
+        }
+
+        *{box-sizing:border-box}
+        body{
+            margin:0; font-family:"Poppins",sans-serif; color:var(--text);
+            background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+            min-height:100vh; padding: 0;
+        }
+
+        .main-full { min-height: 100vh; padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+        /* TOPBAR & SEARCH */
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .search input{ width:100%; padding:10px 12px; border-radius:10px; border:none; outline:none; background: var(--input-bg); color:#222; }
+        .search { flex-grow: 1; max-width: 300px; margin-right: 20px; }
+
+        /* USER MENU */
+        .user-menu-container { position: relative; z-index: 100; }
+        .user-avatar-btn { width:44px;height:44px;border-radius:50%; background:linear-gradient(135deg,var(--accent1),var(--accent2)); display:flex;align-items:center;justify-content:center; border: none; cursor: pointer; padding: 0; overflow: hidden; }
+        .user-avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .user-dropdown { position: absolute; top: 55px; right: 0; width: 300px; background: white; border-radius: 12px; padding: 15px; display: none; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .user-dropdown.show { display: block; animation: fadeIn 0.2s; }
+        .user-dropdown-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .user-info div { font-size: 14px; }
+        .user-dropdown a, .user-dropdown button { display: block; width: 100%; padding: 10px; text-decoration: none; color: #333; border-radius: 8px; text-align: left; border: none; background: transparent; cursor: pointer; transition: background 0.2s; }
+        .user-dropdown a:hover, .user-dropdown button:hover { background: #f0f0f0; }
+        .logout-btn { color: var(--danger) !important; font-weight: 600; }
+
+        /* CONTENT */
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; transition: color .18s; }
+        .tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+        .tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+        .tab-content.active { display: block; }
+        
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table th { text-align:left; padding:15px 18px; color:rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .table td { padding:15px 18px; border-bottom:1px solid rgba(255,255,255,0.06); }
+
+        .form-control, .form-select, textarea.form-control { width: 100%; padding: 14px 18px; border-radius: 10px; border: none; outline: none; background: var(--input-bg); color: var(--input-text-color); font-size: 16px; margin-bottom: 20px; font-family: 'Poppins'; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; }
+        
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; transition: transform 0.15s; }
+        .big-btn:hover { transform: translateY(-2px); }
+        .big-btn.cancel { background: rgba(255,255,255,0.15); color: white; }
+        
+        .small-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; background: rgba(255,255,255,0.1); color: white; margin-right: 5px; }
+        .small-btn.action { background: var(--accent1); color: #000; font-weight: 600; }
+
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-PROGRAMADA { background: var(--accent2); }
+        .status-EN_CURSO { background: var(--success); }
+        .status-FINALIZADA { background: #555; }
+
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; font-weight: 500; }
+        .alert-success { background-color: var(--success); }
+        .alert-error { background-color: var(--danger); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Reuniones y Comunicaciones</h1>
+            <div class="search">
+                <form method="get" action="{% url 'dashboard_reuniones' %}">
+                    <input type="text" name="q" placeholder="Buscar reunión..." value="{{ request.GET.q|default:'' }}">
+                </form>
+            </div>
+            
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    {% if user.frontend_profile.foto %}
+                        <img src="{% static 'images/login.png' %}" alt="Avatar">
+                    {% else %}
+                        <img src="{% static 'images/login.png' %}" alt="Avatar"> {% endif %}
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        {% if user.frontend_profile.foto %}
+                            <img src="{% static 'images/login.png' %}" class="profile-pic">
+                        {% else %}
+                            <img src="{% static 'images/login.png' %}" class="profile-pic">
+                        {% endif %}
+                        <div class="user-info">
+                            <div style="font-weight:bold;">{{ user.username }}</div>
+                            <div style="color:#666;">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}"><span class="material-icons" style="vertical-align:bottom; font-size:18px;">home</span> Dashboard</a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn"><span class="material-icons" style="vertical-align:bottom; font-size:18px;">logout</span> Cerrar Sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="section active">
+            <div class="card">
+                <h3 style="margin:0">Asambleas y Votaciones</h3>
+                <p class="muted">Gestión de convocatorias, registro de votos y actas oficiales.</p>
+
+                <div class="tabs">
+                    <button class="tab-button {% if active_tab == 'proximas' %}active{% endif %}" onclick="location.href='?tab=proximas'">Próximas Reuniones</button>
+                    <button class="tab-button {% if active_tab == 'crear' %}active{% endif %}" onclick="switchTab('crear')">Nueva Convocatoria</button>
+                    <button class="tab-button {% if active_tab == 'historial' %}active{% endif %}" onclick="location.href='?tab=historial'">Historial y Actas</button>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'proximas' %}active{% endif %}" data-tab-content="proximas">
+    <div style="overflow:auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reunion in reuniones_activas %}
+                <tr>
+                    <td>
+                        <strong>{{ reunion.titulo }}</strong><br>
+                        <small class="muted">Virtual: No</small>
+                    </td>
+                    <td>{{ reunion.fecha_reunion|date:"d M Y - H:i" }}</td>
+                    <td><span class="status-badge status-{{ reunion.estado }}">{{ reunion.get_estado_display }}</span></td>
+                    <td>
+                        <a href="?tab=detalle&id={{ reunion.id }}" class="small-btn action" style="text-decoration:none; display:inline-block; margin-right:5px;">
+                            Votar / Detalle
+                        </a>
+
+                        <a href="?tab=editar&id={{ reunion.id }}" class="small-btn" style="text-decoration:none; display:inline-block;">
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center; padding:20px;">No hay reuniones programadas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+                <div class="tab-content {% if active_tab == 'crear' %}active{% endif %}" data-tab-content="crear">
+                    <h4 style="margin-top:0; color:var(--accent1);">Crear Nueva Convocatoria</h4>
+                    
+                    <form method="POST" action="{% url 'crear_reunion' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>Título de la Asamblea</label>
+                            <input type="text" name="titulo" class="form-control" placeholder="Ej. Asamblea Ordinaria Anual 2025" required>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Fecha y Hora</label>
+                                <input type="datetime-local" name="fecha_reunion" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Enlace (Si es virtual)</label>
+                                <input type="url" name="link_reunion" class="form-control" placeholder="https://zoom.us/...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Orden del Día / Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="4" placeholder="1. Lectura del acta anterior..."></textarea>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <button type="button" class="big-btn cancel" onclick="location.href='?tab=proximas'">Cancelar</button>
+                            <button type="submit" class="big-btn" style="width:auto;">Publicar Convocatoria</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'historial' %}active{% endif %}" data-tab-content="historial">
+                    <h4 style="margin-top:0; color:var(--accent1);">Actas de Reuniones Pasadas</h4>
+                    <div style="overflow:auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Título</th>
+                                    <th>Acta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reunion in reuniones_pasadas %}
+                                <tr>
+                                    <td>{{ reunion.fecha_reunion|date:"d/m/Y" }}</td>
+                                    <td>{{ reunion.titulo }}</td>
+                                    <td>
+                                        {% if reunion.acta_url %}
+                                            <a href="{{ reunion.acta_url }}" target="_blank" class="small-btn action">Descargar PDF</a>
+                                        {% else %}
+                                            <span class="muted">Pendiente de subida</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" style="text-align:center;">No hay historial disponible.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        {% if seleccionada and active_tab == 'detalle' %}
+<div class="tab-content active" data-tab-content="detalle">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="margin:0; color:var(--accent1);">{{ seleccionada.titulo }}</h4>
+        <a href="?tab=proximas" class="big-btn cancel" style="padding:8px 15px; font-size:14px; text-decoration:none;">← Volver</a>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; margin-top:20px;">
+        <div class="grid-2">
+            <div>
+                <label class="muted">Fecha</label>
+                <div style="font-size:18px;">{{ seleccionada.fecha_reunion|date:"d F Y, H:i" }}</div>
+            </div>
+            <div>
+                <label class="muted">Estado</label><br>
+                <span class="status-badge status-{{ seleccionada.estado }}">{{ seleccionada.get_estado_display }}</span>
+            </div>
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.1); margin:20px 0;">
+        <h5>Orden del Día / Votación</h5>
+        <div style="background:var(--glass-strong); padding:15px; border-radius:10px;">
+            <p>Tema: Aprobación de Presupuesto</p>
+            <button class="small-btn action" onclick="alert('Voto registrado')">A Favor</button>
+            <button class="small-btn del" onclick="alert('Voto registrado')">En Contra</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if seleccionada and active_tab == 'editar' %}
+<div class="tab-content active" data-tab-content="editar">
+    <h4 style="margin-top:0; color:var(--accent1);">Editar Reunión</h4>
+    <form method="POST" action="{% url 'actualizar_reunion' seleccionada.id %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Título</label>
+            <input type="text" name="titulo" class="form-control" value="{{ seleccionada.titulo }}" required>
+        </div>
+        <div class="form-group">
+            <label>Fecha (YYYY-MM-DDTHH:MM)</label>
+            <input type="datetime-local" name="fecha_reunion" class="form-control" value="{{ seleccionada.fecha_reunion|date:'Y-m-d\TH:i' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Estado</label>
+            <select name="estado" class="form-select">
+                <option value="PROGRAMADA" {% if seleccionada.estado == 'PROGRAMADA' %}selected{% endif %}>Programada</option>
+                <option value="FINALIZADA" {% if seleccionada.estado == 'FINALIZADA' %}selected{% endif %}>Finalizada</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <a href="?tab=proximas" class="big-btn cancel" style="text-align:center; text-decoration:none;">Cancelar</a>
+            <button type="submit" class="big-btn">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+        <footer style="text-align:center; padding: 20px; color: var(--muted); font-size: 14px;">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        // Función de tabs básica
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            const btn = document.querySelector(`.tabs .tab-button[onclick*="'${tabId}'"]`);
+            if(btn) btn.classList.add('active');
+            
+            const content = document.querySelector(`[data-tab-content="${tabId}"]`);
+            if(content) content.classList.add('active');
+        }
+
+        // Dropdown Avatar Logic
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if(userAvatarBtn){
+            userAvatarBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { 
+                if (!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) 
+                    userDropdown.classList.remove('show'); 
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Áreas Comunes</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* ESTILOS GLOBALES (Glassmorphism) */
+        :root{
+            --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974');
+            --glass: rgba(255,255,255,0.12);
+            --glass-strong: rgba(255,255,255,0.18);
+            --accent1: #38b6ff;
+            --accent2: #0e77c4;
+            --danger: #e04a4a;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.85);
+            --radius: 12px;
+            --input-bg: rgba(255,255,255,0.92);
+            --input-text-color: #222;
+        }
+
+        *{box-sizing:border-box}
+        body{
+            margin:0; font-family:"Poppins",sans-serif; color:var(--text);
+            background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed;
+            min-height:100vh; padding: 0;
+        }
+
+        .main-full { min-height: 100vh; padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+        /* TOPBAR */
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        
+        .search input{ width:100%; padding:10px 12px; border-radius:10px; border:none; outline:none; background: var(--input-bg); color:#222; }
+        .search { flex-grow: 1; max-width: 300px; margin-right: 20px; }
+
+        /* Dropdown */
+.user-menu-container { position: relative; z-index: 100; }
+.user-avatar-btn {
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#032033;
+    box-shadow:0 6px 18px rgba(14,119,196,0.18);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    font-size: 18px;
+    transition: transform 0.15s;
+}
+.user-avatar-btn:hover { transform: scale(1.05); }
+.user-avatar-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.user-dropdown {
+    position: absolute; top: 55px; right: 0; width: 320px; background-color: white;
+    border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: #333;
+    padding: 20px; display: none; flex-direction: column; gap: 15px;
+    animation: fadeInDrop 0.2s ease-out; transform-origin: top right;
+}
+.user-dropdown.show { display: flex; }
+@keyframes fadeInDrop { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.user-dropdown-header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.user-dropdown-header .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; }
+.user-dropdown-header .user-info { flex-grow: 1; min-width: 0; }
+.user-dropdown-header .user-email { font-size: 14px; color: #666; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-dropdown-header .user-greeting { font-size: 18px; font-weight: 600; color: #333; }
+.user-dropdown-option { padding: 12px 15px; border-radius: 8px; background-color: #f5f5f5; text-decoration: none; color: #333; font-weight: 500; display: flex; align-items: center; gap: 10px; transition: background-color 0.15s; }
+.user-dropdown-option:hover { background-color: #e0e0e0; }
+.logout-form { margin: 0; padding: 0; display: block; }
+.user-dropdown-action-btn { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; background-color: transparent; color: #333; font-weight: 500; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; }
+.user-dropdown-action-btn:hover { background-color: #f0f0f0; border-color: #aaa; }
+.user-dropdown-logout { background-color: var(--danger); color: white; border-color: var(--danger); display: flex; align-items: center; gap: 8px; }
+.user-dropdown-logout:hover { background-color: #c0392b; border-color: #c0392b; }
+
+
+        /* CONTENT */
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        
+        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-button { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 10px 15px; font-size: 16px; font-weight: 600; border-radius: 6px 6px 0 0; transition: color .18s; }
+        .tab-button.active { color: var(--accent1); border-bottom: 3px solid var(--accent1); }
+        .tab-content { display: none; padding-top: 15px; animation: fadeIn .2s ease forwards; }
+        .tab-content.active { display: block; }
+
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table th { text-align:left; padding:15px 18px; color:rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .table td { padding:15px 18px; border-bottom:1px solid rgba(255,255,255,0.06); vertical-align: middle; }
+
+        /* FORM STYLES */
+        .form-control, .form-select { width: 100%; padding: 14px 18px; border-radius: 10px; border: none; outline: none; background: var(--input-bg); color: var(--input-text-color); font-size: 16px; margin-bottom: 20px; font-family: 'Poppins'; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; }
+        
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; transition: transform 0.15s; }
+        .big-btn:hover { transform: translateY(-2px); }
+        
+        .small-btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; background: rgba(255,255,255,0.1); color: white; margin-right: 5px; }
+        .small-btn.cancel { background: var(--danger); }
+
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-APROBADA { background: var(--success); }
+        .status-PENDIENTE { background: var(--warning); color: #333; }
+        .status-RECHAZADA, .status-CANCELADA { background: var(--danger); }
+
+        /* Tarjetas de Áreas (Grid) */
+        .areas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .area-card { background: var(--glass-strong); border-radius: 12px; overflow: hidden; transition: transform 0.2s; }
+        .area-card:hover { transform: translateY(-5px); }
+        .area-img { height: 140px; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; }
+        .area-body { padding: 15px; }
+        .area-title { font-size: 18px; font-weight: 700; margin: 0 0 5px 0; color: var(--accent1); }
+        .area-info { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; color: white; font-weight: 500; }
+        .alert-success { background-color: var(--success); }
+        .alert-error { background-color: var(--danger); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Áreas Comunes y Amenidades</h1>
+            
+            <div class="search">
+                <form method="get" action="{% url 'dashboard_areas' %}">
+                    <input type="text" name="q" placeholder="Buscar área o reserva..." value="{{ busqueda_actual|default:'' }}">
+                </form>
+            </div>
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    <img src="{% static 'images/login.png' %}" alt="User Avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img src="{% static 'images/login.png' %}" alt="Profile Picture" class="profile-pic">
+                        <div class="user-info">
+                            <div class="user-email">admin.condogest@example.com</div>
+                            <div class="user-greeting">¡Hola, Gestor!</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'dashboard' %}" class="user-dropdown-option">
+                        <span class="material-icons" style="font-size: 20px;">home</span> Dashboard
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-dropdown-action-btn user-dropdown-logout">
+                            <span class="material-icons" style="font-size: 20px;">logout</span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="section active">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin:0">Gestión de Espacios</h3>
+                        <p class="muted">Reservas de piscina, salones, gimnasio y canchas.</p>
+                    </div>
+                    <button class="small-btn" onclick="switchTab('crear')" style="background:var(--accent1); color:#000; font-weight:600;">
+                        + Nueva Reserva
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button {% if active_tab == 'calendario' %}active{% endif %}" onclick="location.href='?tab=calendario'">Calendario de Reservas</button>
+                    <button class="tab-button {% if active_tab == 'areas' %}active{% endif %}" onclick="switchTab('areas')">Catálogo de Áreas</button>
+                    <button class="tab-button {% if active_tab == 'crear' %}active{% endif %}" onclick="switchTab('crear')">Reservar Espacio</button>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'calendario' %}active{% endif %}" data-tab-content="calendario">
+                    <div style="overflow:auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Área</th>
+                                    <th>Residente / Solicitante</th>
+                                    <th>Horario</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reserva in reservas_list %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:700;">{{ reserva.fecha_reserva|date:"d M Y" }}</div>
+                                    </td>
+                                    <td>{{ reserva.area.nombre }}</td>
+                                    <td>{{ reserva.residente.unidad_principal }} - {{ reserva.residente.nombre_completo }}</td>
+                                    <td>{{ reserva.hora_inicio|time:"H:i" }} - {{ reserva.hora_fin|time:"H:i" }}</td>
+                                    <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span></td>
+                                    <td>
+                                        {% if reserva.estado != 'CANCELADA' and reserva.estado != 'FINALIZADA' %}
+                                        <form method="POST" action="{% url 'cancelar_reserva' reserva.id %}" style="display:inline;" onsubmit="return confirm('¿Cancelar esta reserva?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="small-btn cancel">Cancelar</button>
+                                        </form>
+                                        {% else %}
+                                        <span class="muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" style="text-align:center; padding:30px;">No hay reservas próximas.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'areas' %}active{% endif %}" data-tab-content="areas">
+                    <div class="areas-grid">
+                        {% for area in areas_list %}
+                        <div class="area-card">
+                            <div class="area-img">
+                                <span class="material-icons" style="font-size:60px; color:rgba(255,255,255,0.5);">weekend</span>
+                            </div>
+                            <div class="area-body">
+                                <h4 class="area-title">{{ area.nombre }}</h4>
+                                <div class="area-info">Capacidad: {{ area.capacidad_maxima }} personas</div>
+                                <div class="area-info">Costo: ${{ area.costo_reserva }}</div>
+                                <div style="margin-top:10px;">
+                                    <button class="small-btn" onclick="preselectArea('{{ area.id }}')">Reservar</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p>No hay áreas comunes registradas.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="tab-content {% if active_tab == 'crear' %}active{% endif %}" data-tab-content="crear">
+                    <h4 style="margin-top:0; color:var(--accent1);">Solicitar Reserva</h4>
+                    
+                    <form method="POST" action="{% url 'crear_reserva' %}">
+                        {% csrf_token %}
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Residente Solicitante</label>
+                                <select name="residente_id" class="form-select" required>
+                                    <option value="">Seleccione Residente...</option>
+                                    {% for res in residentes_list %}
+                                        <option value="{{ res.id }}">{{ res.unidad_principal }} - {{ res.nombre_completo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Área a Reservar</label>
+                                <select name="area_id" id="areaSelect" class="form-select" required>
+                                    <option value="">Seleccione Área...</option>
+                                    {% for area in areas_list %}
+                                        <option value="{{ area.id }}">{{ area.nombre }} (Cap: {{ area.capacidad_maxima }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Fecha del Evento</label>
+                                <input type="date" max="2025-11-28" name="fecha_reserva" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cantidad de Personas</label>
+                                <input type="number" name="cantidad_personas" class="form-control" placeholder="Ej. 10" required>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Hora Inicio</label>
+                                <input type="time" name="hora_inicio" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora Fin</label>
+                                <input type="time" name="hora_fin" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                            <button type="submit" class="big-btn">Confirmar Reserva</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+
+        <footer style="text-align:center; padding: 20px; color: var(--muted); font-size: 14px;">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            const btn = document.querySelector(`.tabs .tab-button[onclick*="'${tabId}'"]`);
+            if(btn) btn.classList.add('active');
+            
+            const content = document.querySelector(`[data-tab-content="${tabId}"]`);
+            if(content) content.classList.add('active');
+        }
+
+        // Función para saltar a la pestaña de reserva con el área seleccionada
+        function preselectArea(areaId) {
+            switchTab('crear');
+            document.getElementById('areaSelect').value = areaId;
+        }
+
+        // Dropdown Logic
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if(userAvatarBtn){
+            userAvatarBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) userDropdown.classList.remove('show'); });
+        }
+    </script>
+</body>
+</html>

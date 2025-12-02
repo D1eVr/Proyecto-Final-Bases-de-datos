@@ -1,0 +1,27 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      - MYSQL_DATABASE=condominios
+      - MYSQL_USER=ixchel
+      - MYSQL_PASSWORD=condominios123
+      - MYSQL_ROOT_PASSWORD=root123
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data/db:/var/lib/mysql
+
+  web:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    command: >
+      /wait-for-db.sh sh -c "
+        python manage.py runserver 0.0.0.0:8000
+      "
+    depends_on:
+      - db
+

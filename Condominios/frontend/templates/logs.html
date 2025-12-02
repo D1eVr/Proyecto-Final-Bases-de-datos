@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CondoGest — Historial de Cambios</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        /* ESTILOS GLOBALES */
+        :root{ --bg-image: url('https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1974'); --glass: rgba(255,255,255,0.12); --glass-strong: rgba(255,255,255,0.18); --accent1: #38b6ff; --accent2: #0e77c4; --danger: #e04a4a; --success: #4CAF50; --warning: #FFC107; --text: #ffffff; --muted: rgba(255,255,255,0.85); --radius: 12px; --input-bg: rgba(255,255,255,0.92); --input-text-color: #222; }
+        *{box-sizing:border-box} body{ margin:0; font-family:"Poppins",sans-serif; color:var(--text); background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-image) center/cover no-repeat fixed; min-height:100vh; padding: 0; }
+        .main-full { min-height: 100vh; padding: 24px; max-width: 1200px; margin: 0 auto; }
+        
+        /* TOPBAR */
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .topbar h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .search input{ width:100%; padding:10px 12px; border-radius:10px; border:none; outline:none; background: var(--input-bg); color:#222; }
+        .search { flex-grow: 1; max-width: 300px; margin-right: 20px; }
+
+        /* USER MENU */
+        .user-menu-container { position: relative; z-index: 100; }
+        .user-avatar-btn { width:44px;height:44px;border-radius:50%; background:linear-gradient(135deg,var(--accent1),var(--accent2)); display:flex;align-items:center;justify-content:center; border: none; cursor: pointer; padding: 0; overflow: hidden; }
+        .user-avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .user-dropdown { position: absolute; top: 55px; right: 0; width: 250px; background: white; border-radius: 12px; padding: 15px; display: none; color: #333; }
+        .user-dropdown.show { display: block; }
+        .user-dropdown a, .user-dropdown button { display: block; width: 100%; padding: 10px; text-decoration: none; color: #333; border-radius: 8px; text-align: left; border: none; background: transparent; cursor: pointer; }
+        .user-dropdown a:hover, .user-dropdown button:hover { background: #f0f0f0; }
+
+        /* CONTENT */
+        .card { padding:25px; border-radius:18px; background:var(--glass); backdrop-filter: blur(14px); box-shadow: 0 10px 35px rgba(0,0,0,0.4); }
+        .table { width:100%; border-collapse:collapse; margin-top:12px; }
+        .table th { text-align:left; padding:15px 18px; color:rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .table td { padding:15px 18px; border-bottom:1px solid rgba(255,255,255,0.06); font-size: 14px; }
+
+        /* Badges de Acción */
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-CREACION { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+        .badge-EDICION { background: rgba(33, 150, 243, 0.2); color: #2196F3; border: 1px solid #2196F3; }
+        .badge-ELIMINACION { background: rgba(244, 67, 54, 0.2); color: #F44336; border: 1px solid #F44336; }
+        .badge-ACCESO { background: rgba(255, 193, 7, 0.2); color: #FFC107; border: 1px solid #FFC107; }
+
+        .big-btn { padding: 14px 24px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; background: linear-gradient(90deg,var(--accent1),var(--accent2)); color: #032033; transition: transform 0.15s; }
+        .section { animation: fadeIn .28s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="main-full">
+
+        <div class="topbar">
+            <h1>Auditoría y Logs del Sistema</h1>
+            
+            <div class="search">
+                <form method="get" action="{% url 'dashboard_logs' %}">
+                    <input type="text" name="q" placeholder="Buscar por usuario, acción o detalle..." value="{{ busqueda_actual|default:'' }}">
+                </form>
+            </div>
+            
+            <div class="user-menu-container">
+                <button class="user-avatar-btn" id="userAvatarBtn">
+                    {% if user.frontend_profile.foto %}
+                        <img src="{{ user.frontend_profile.foto.url }}" alt="Avatar">
+                    {% else %}
+                        <img src="{% static 'images/login.png' %}" alt="Avatar">
+                    {% endif %}
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div style="padding:15px; border-bottom:1px solid #eee;">
+                        <strong>{{ user.username }}</strong><br>Admin
+                    </div>
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit" style="color:red;">Cerrar Sesión</button></form>
+                </div>
+            </div>
+        </div>
+
+        <section class="section active">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="margin:0">Historial de Operaciones</h3>
+                        <p class="muted">Registro inmutable de acciones realizadas en la plataforma.</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="muted">Total registros: {{ logs|length }}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; overflow-x:auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fecha / Hora</th>
+                                <th>Usuario</th>
+                                <th>Módulo</th>
+                                <th>Acción</th>
+                                <th>Detalle del Cambio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td style="white-space:nowrap; width:160px;">
+                                    <div style="font-weight:600;">{{ log.fecha|date:"d M Y" }}</div>
+                                    <div class="muted" style="font-size:12px;">{{ log.fecha|time:"H:i:s" }}</div>
+                                </td>
+                                <td>
+                                    {% if log.usuario %}
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div style="width:30px; height:30px; background:var(--glass-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--accent1); font-size:12px;">
+                                                {{ log.usuario.username|slice:":2"|upper }}
+                                            </div>
+                                            {{ log.usuario.username }}
+                                        </div>
+                                    {% else %}
+                                        <span class="muted">Sistema / Anónimo</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.modulo }}</td>
+                                <td>
+                                    <span class="badge badge-{{ log.accion }}">
+                                        {{ log.get_accion_display }}
+                                    </span>
+                                </td>
+                                <td style="color:rgba(255,255,255,0.9);">
+                                    {{ log.descripcion }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
+                                    No hay registros de actividad recientes.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+
+        <footer style="text-align:center; padding: 20px; color: var(--muted); font-size: 14px;">© CondoGest 2025</footer>
+    </div>
+
+    <script>
+        // Dropdown Logic
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if(userAvatarBtn){
+            userAvatarBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) userDropdown.classList.remove('show'); });
+        }
+    </script>
+</body>
+</html>
