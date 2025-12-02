@@ -12,7 +12,7 @@ El sistema está construido bajo una arquitectura modular utilizando:
 Instalación Rápida
 1.⁠ ⁠Clonar el repositorio
 git clone https://github.com/D1eVr/Proyecto-Final-Bases-de-datos.git
-cd CondoGest
+cd Condominios
 
 2.⁠ ⁠Levantar contenedores
 docker-compose up --build -d
